@@ -5,14 +5,14 @@ String[] getFilesWithExtension(final String ext)
   java.io.File folder = new java.io.File(dataPath(""));
 
   // let's set a filter (which returns true if file's extension is .jpg)
-  java.io.FilenameFilter jpgFilter = new java.io.FilenameFilter() {
+  java.io.FilenameFilter fileFilter = new java.io.FilenameFilter() {
     public boolean accept(File dir, String name) {
       return name.toLowerCase().endsWith(ext);
     }
   };
 
   // list the files in the data folder, passing the filter as parameter
-  String[] filenames = folder.list(jpgFilter);
+  String[] filenames = folder.list(fileFilter);
 
   if (filenames != null)
   {
@@ -26,6 +26,7 @@ String[] getFilesWithExtension(final String ext)
   }
   return filenames;
 }
+
 
 
 void refreshPresetFilesList(int guiX, int guiY)
@@ -64,19 +65,22 @@ void controlEvent(ControlEvent theEvent) {
   // if (theEvent.isGroup())
   // to avoid an error message thrown by controlP5.
 
-  if (theEvent.isGroup()) {
+  if (theEvent.isGroup() && !loadingGUIPreset) 
+  {
     // check if the Event was triggered from a ControlGroup
     println("GROUP::" + theEvent.getGroup().getValue()+" from "+theEvent.getGroup());
 
-    if (theEvent.getGroup().name().equals("savedFileNames"))
+    if (theEvent.getGroup().name().equals("savedFileNames") )
     {
+      loadingGUIPreset = true;
       String loadFileName = savedFiles[int(theEvent.getGroup().getValue())];
       println("selected file: " + loadFileName);
       gui.getProperties().load("data/" + loadFileName);
+      loadingGUIPreset = false;
     }
-  } 
-  else if (theEvent.isController()) {
-    println(theEvent.getController().getValue()+" from "+theEvent.getController());
   }
+   
+//  else if (theEvent.isController()) {
+//    println(theEvent.getController().getValue()+" from "+theEvent.getController());
+//  }
 }
-
