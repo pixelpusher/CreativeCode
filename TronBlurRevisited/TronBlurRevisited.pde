@@ -1,4 +1,4 @@
-// Tron Blur Lighting Edition OLW Version
+// Tron BlurRevisited
 //
 // Original concept and code by David Bollinger
 // http://www.davebollinger.com (site is broken?)

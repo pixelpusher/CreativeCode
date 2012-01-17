@@ -1,4 +1,4 @@
-// Tron Blur Lighting Edition OLW Version
+// Tron Blur Revisited Frame differencing Version (for Processing 2.0+)
 //
 // Original concept and code by David Bollinger
 // http://www.davebollinger.com (site is broken?)
