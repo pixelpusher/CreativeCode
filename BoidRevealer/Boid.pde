@@ -14,7 +14,7 @@ class Boid {
     acc = new PVector(0, 0);
     vel = new PVector(random(-2, 2), random(-2, 2));
     loc = l.get();
-    r = 6.0 + random(-4, 4);
+    r = 2.0 + random(-1, 1);
     maxspeed = ms;
     maxforce = mf;
   }

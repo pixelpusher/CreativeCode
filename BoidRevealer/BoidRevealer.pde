@@ -49,6 +49,10 @@ GLTexture bgImage;
 
 Flock flock;
 
+// this prevents the loading of GUI presets from looping forever... 
+boolean loadingGUIPreset = false;
+
+// boids variables:
 
 float desiredseparation = 25.0;
 float avoidWallsFactor = 0.8;
@@ -79,10 +83,10 @@ GLTextureFilter extractBloom, blur, blend4, toneMap;
 //Camera cam;
 
 void setup() {
-  size(720, 480, GLConstants.GLGRAPHICS);
+  size(640, 480, GLConstants.GLGRAPHICS);
   noStroke();
   hint( ENABLE_OPENGL_4X_SMOOTH );  
-
+  noCursor();
   {
     PGraphicsOpenGL pgl = (PGraphicsOpenGL) g;  // g may change
     gl = pgl.beginGL();  // always use the GL object returned by beginGL
@@ -220,9 +224,14 @@ void draw() {
   {
     //update ball position
     node.update();
-    node.draw(offscreen);
+    //node.draw(offscreen);
   }
 
+  if (keyPressed)
+  {
+    fill(255,120);
+    ellipse(mouseX,mouseY,20,20);
+  }
 
   //cam.circle(radians(noise(millis()*2)*noise(millis())*50));    
   //cam.circle(radians(mouseX / 800.) * PI);
@@ -348,9 +357,10 @@ void keyPressed()
       break;
 
       case('L'):
+      loadingGUIPreset = true;
       gui.getProperties().load("data/" + presetName.getText()+".ser");
       println("Loaded preset:" + "data/" + presetName.getText()+".ser");
-      break;
+      loadingGUIPreset = false;
     }
     
     println(gui.getProperties().getSnapshotIndices());
