@@ -23,30 +23,44 @@ void draw()
 
   for (int index=0; index < width; index++)
   {
+    
+    // this is the moving index, from left to right. 
     int movedIndex = index + (frameCount*speed);
     movedIndex = movedIndex % width; // wrap around width
     
+    // draw sin wave 1 (point by point)
 
-    float newHeight = map(index, 0, width, 1, 0) * waveHeight;
+    // this is the damped height (fades out from left to right
+    float dampedHeight = map(index, 0, width, 1, 0) * waveHeight;
 
-    float heightValue = newHeight * 
+    // the y value (height) of the sine wave for this hrizontal screen position
+    float heightValue = dampedHeight * 
       sin( map(movedIndex, 0, width, 0, periods*2*TWO_PI) ) 
-      + newHeight;
+      + dampedHeight;
 
+    // invert the height (so it grows from the bottom up instead of top down)
     heightValue = height-heightValue;
     
     stroke(255, 0, 255);
     point(index, heightValue);
 
 
-    // draw sine wave 2
-    newHeight = map(index, 0, width, 1, 0) * waveHeight * 0.5;
+    // draw sine wave 2 (point-by-point)
+    dampedHeight = map(index, 0, width, 1, 0) * waveHeight * 0.5;
 
     float sinVal1 = sin( map(movedIndex, 0, width, 0, periods*TWO_PI) );
     float sinVal2 = sin( map(movedIndex, 0, width, 0, periods*4*TWO_PI));
 
-    heightValue = newHeight * ( sinVal1 + sinVal2)  + newHeight;
+    //
+    // Add the two sin waves together, but mix them in different amounts.
+    // We try to keep the sum of the coefficients (0.8 and 0.2, respectively)
+    // equal to 1.0 (e.g., 0.2 + 0.8 = 1.0) because otherwise the height of the 
+    // additive sin wave will be too large (greater than 1.0)
+    // 
+    heightValue = dampedHeight * ( 0.8*sinVal1 + 0.2*sinVal2) + dampedHeight;
 
+     
+    // invert the height (so it grows from the bottom up instead of top down)
     heightValue = height-heightValue;
 
     stroke(255, 255, 0);
