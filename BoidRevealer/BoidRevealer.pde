@@ -83,7 +83,7 @@ GLTextureFilter extractBloom, blur, blend4, toneMap;
 //Camera cam;
 
 void setup() {
-  size(640, 480, GLConstants.GLGRAPHICS);
+  size(screenWidth, screenHeight, GLConstants.GLGRAPHICS);
   noStroke();
   hint( ENABLE_OPENGL_4X_SMOOTH );  
   noCursor();
