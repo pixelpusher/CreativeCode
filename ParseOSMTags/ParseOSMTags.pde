@@ -2,6 +2,9 @@
 * This example loads an OpenStreetMap data file of Greenwich, London
 * and only draws the nodes (areas submitted by users) with "useful" tags
 *
+* If you're using Processing 1.5 you may need to add the XML.java file to this sketch for it to work
+* (it's included in Processing 2.0):  https://github.com/pixelpusher/P5ProjectionMapping/raw/master/TextureMappingMultipleP1_5/XML.java
+
 * by Evan Raskob : evan@FLKR.com
 * Code licensed GNU Affero 3.0+ (AGPL 3.0+)
 * Data licensed CC-BY-ATTRIBUTION SHARE ALIKE by http://OpenStreetMap.org
