@@ -1,15 +1,15 @@
 /*
 * This example loads an OpenStreetMap data file of Greenwich, London
-* and only draws the nodes (areas submitted by users) with "useful" tags
-*
-* If you're using Processing 1.5 you may need to add the XML.java file to this sketch for it to work
-* (it's included in Processing 2.0):  https://github.com/pixelpusher/P5ProjectionMapping/raw/master/TextureMappingMultipleP1_5/XML.java
-
-* by Evan Raskob : evan@FLKR.com
-* Code licensed GNU Affero 3.0+ (AGPL 3.0+)
-* Data licensed CC-BY-ATTRIBUTION SHARE ALIKE by http://OpenStreetMap.org
-*
-*/
+ * and only draws the nodes (areas submitted by users) with "useful" tags
+ *
+ * If you're using Processing 1.5 you may need to add the XML.java file to this sketch for it to work
+ * (it's included in Processing 2.0):  https://github.com/pixelpusher/P5ProjectionMapping/raw/master/TextureMappingMultipleP1_5/XML.java
+ 
+ * by Evan Raskob : evan@FLKR.com
+ * Code licensed GNU Affero 3.0+ (AGPL 3.0+)
+ * Data licensed CC-BY-ATTRIBUTION SHARE ALIKE by http://OpenStreetMap.org
+ *
+ */
 
 
 // root xml node for config data
@@ -40,7 +40,7 @@ class OSMNode
   {
     tagData = new HashMap<String, String>();
   }
-  
+
   String toString()
   {
     String s =  "[id:" + id + ", lat:" + latitude + ", lon:" + longitude + ", user:" + user + "\n[";
@@ -63,23 +63,38 @@ void setup()
   OSMNodes = new ArrayList<OSMNode>();
 
   readOSMXML(OSMXmlFileName);
-  
+
   background(0);
-  
+
   for (OSMNode node : OSMNodes)
   {
+    //    if (node.tagData.size() > 0 && node.user.equals("user_5121") )
     if (node.tagData.size() > 0)
     {
-      
-      float x = map(node.longitude, MinLongitude, MaxLongitude, 0, width);
-       float y = map(node.latitude, MinLatitude, MaxLatitude, 0, height);
-      //println("x:"+x+", "+"y:" + y);
-      stroke(255,100);
-      ellipse(x,y,4,4);
+      for (String tag : node.tagData.keySet())
+      {
+        if (tag.equals("highway"))
+        {
+
+          float x = map(node.longitude, MinLongitude, MaxLongitude, 0, width);
+          float y = map(node.latitude, MaxLatitude, MinLatitude, 0, height);
+          //println("x:"+x+", "+"y:" + y);
+          if ( node.tagData.get(tag).contains("roundabout") )
+          {
+            stroke(0,0,255);
+            ellipse(x, y, 20, 20);
+          }
+          else
+          {
+            stroke(255, 100);
+            ellipse(x, y, 4, 4);
+          }
+        }
+      }
     }
   }
-  
-  
+
+
   noLoop();
 } 
 
@@ -123,8 +138,8 @@ boolean readOSMXML(String filename)
       MaxLongitude = node.getFloat("maxlon");
       MinLatitude = node.getFloat("minlat");
       MaxLatitude = node.getFloat("maxlat");
-      
-      println("MinLon:" + MinLongitude +", " + "MaxLon:" + MaxLongitude); 
+
+      println("MinLon:" + MinLongitude +", " + "MaxLon:" + MaxLongitude);
     }
 
     // now go through all nodes!!
@@ -170,18 +185,18 @@ boolean readOSMXML(String filename)
         }
         // done with tags
       }
-      
+
       // DEBUG
       // ONLY PRINT IF THERE'S A TAG
       //if (osmnode.tagData.size() > 0)
       //  println(osmnode);
-      
+
       OSMNodes.add(osmnode);
-      
+
       // done with nodes
     }
-    
-  // done with file exists test  
+
+    // done with file exists test
   }
   else
   {
