@@ -41,7 +41,7 @@ void setup()
 {  
   size(1024, 256, GLConstants.GLGRAPHICS);
 
-  waveHeight = height/2;
+  waveHeight = height/2.3;
 
   //  noCursor();
   {
@@ -64,17 +64,15 @@ void setup()
   //
   gui = new ControlP5(this);
   int guiX = 5;
-  int guiY = 10;  
+  int guiY = height/2+20;  
 
-  Slider slider = gui.addSlider("fx", 0.01f, 1f, 0.1f, guiX, guiY, 100, 20);
+  Slider slider = gui.addSlider("fx", 0.01f, 1f, 0.1f, guiX, guiY, 100, 16);
   guiY += slider.getHeight()+2;
-  slider = gui.addSlider("fy", 0.01f, 1f, 0.1f, guiX, guiY, 100, 20);
-  guiY += slider.getHeight()+4;
-  slider = gui.addSlider("speed", -HALF_PI/10f, HALF_PI/10f, 0.1f, guiX, guiY, 300, 20);
-  guiY += slider.getHeight()+4;
-  slider = gui.addSlider("wavePoints", 2, width*4, 100, guiX, guiY, int(width/1.5), 20);
-  guiY += slider.getHeight()+4;
-  slider = gui.addSlider("periods", 0, 8, 1, guiX, guiY, int(width/1.5), 20);
+  slider = gui.addSlider("fy", 0.01f, 1f, 0.1f, guiX, guiY, 100, 16);
+  guiY += slider.getHeight()+2;
+  slider = gui.addSlider("wavePoints", 2, width*4, 100, guiX, guiY, int(width/1.5), 16);
+  guiY += slider.getHeight()+2;
+  slider = gui.addSlider("periods", 0, 8, 1, guiX, guiY, int(width/1.5), 16);
 }
 
 

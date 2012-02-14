@@ -40,9 +40,9 @@ void draw()
     
     // height goes from 0 to waveHeight
     // remember: sin( ) goes from -1 to 1
-    float heightValue = waveHeight * 
-      (1+sin( map(movedIndex, 0,width, 0, periods*TWO_PI) ))*0.5;
-      
+    float heightValue = waveHeight * (1-
+      //(1-(1+cos( map(movedIndex, 0,width, 0, periods*TWO_PI) )))*0.5;
+      (1+cos( map(movedIndex, 0,width, 0, periods*TWO_PI) ))*0.5);
     
     float newx = movedIndex;
     float newy = heightValue;
@@ -50,7 +50,7 @@ void draw()
     // convert the horizontal position to an angle
     float angle = map(index, 0,width, 0, TWO_PI); 
 
-    // radius of our circle 
+    // radius of our circle, changing over time 
     float r = newy;
     
     float h = r/waveHeight; // hue from 0-1
