@@ -14,6 +14,8 @@ void setup()
 
 void draw()
 {
+  smooth();
+  strokeWeight(4);
   
   float colorChance = random(0,1);
   
