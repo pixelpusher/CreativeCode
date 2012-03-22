@@ -1,4 +1,4 @@
-void newSwarm(GLTexture tex, TriangleMesh mesh)
+ImageParticleSwarm newSwarm(GLTexture tex, TriangleMesh mesh)
 {
   swarm = new ImageParticleSwarm(this, tex);
  /* 
@@ -28,6 +28,7 @@ void newSwarm(GLTexture tex, TriangleMesh mesh)
   // clear tri mesh
   mesh.clear();
   
+  return swarm;
   
  // handPositions.clear();
 }
@@ -38,8 +39,8 @@ void handJerked()
 {
   Vec3D pos=new Vec3D(leftHandPos.x-width/4, leftHandPos.y-height/4, leftHandPos.z);
 
-//  pos.rotateX(rotation.x);
-//  pos.rotateY(rotation.y);
+  pos.rotateX(rotation.x);
+  pos.rotateY(rotation.y);
 
   Vec3D a=pos.add(0, 0, weight);
   Vec3D b=pos.add(0, 0, -weight);

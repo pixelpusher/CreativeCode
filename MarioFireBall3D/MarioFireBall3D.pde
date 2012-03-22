@@ -29,7 +29,7 @@ float MESH_Y_SCALE = 10.0;
 GLGraphicsOffScreen leftBuffer, rightBuffer;
 float panAmt = -4.6;
 float panAngle = -0.04;
-
+float depthScale;
 
 
 void init() {
@@ -80,8 +80,8 @@ boolean drawBG = true;
 // relevant skeleton positions from our Kinect
 PVector rightShoulderPos = new PVector();
 PVector leftShoulderPos = new PVector();
-PVector rightHipPos = new PVector();
-PVector leftHipPos = new PVector();
+PVector rightElbowPos = new PVector();
+PVector leftElbowPos = new PVector();
 PVector facePos = new PVector();
 PVector neckPos = new PVector();
 PVector leftHandPos = new PVector();
@@ -95,6 +95,7 @@ SimpleOpenNI  context;
 MoveDetect md;
 
 
+int currentId = -1;
 
 ///////////////////////////////////////////
 // SETUP
@@ -130,6 +131,7 @@ void setup()
   gl.setSwapInterval( 1 ); // use value 0 to disable v-sync 
   pgl.endGL();
 
+  depthScale = height/4f;
 
   // create fireball particle "swarm"
   swarms = new LinkedList<ImageParticleSwarm>();
@@ -152,20 +154,33 @@ void setup()
   armTex = new GLTexture(this, armTexFile);
   legTex = new GLTexture(this, legTexFile);
   bgTex = new GLTexture(this, bgTexFile);
+
+  renderer = (PGraphicsOpenGL)(this.g);
+  context.enableScene();
 }
 
 
 
 void drawIntoBuffer(GLGraphicsOffScreen buffer)
 {
-  
+
   buffer.beginDraw();
   buffer.camera();
   //buffer.lights();
   buffer.pushMatrix();
   buffer.background(0);
+
+  buffer.fill(255, 180);
+  buffer.noStroke(); 
+  renderer = buffer; 
+  //renderRectFromVectors( leftElbowPos, leftHandPos, 20);
+  renderRectFromVectors( facePos, neckPos, 20);
+
+
   cam.getState().apply(buffer);
-  
+
+
+
   //buffer.translate(buffer.width/2, buffer.height/2, 0);
   //buffer.rotateX(rotation.x);
   //buffer.rotateY(rotation.y);  
@@ -201,6 +216,12 @@ void drawIntoBuffer(GLGraphicsOffScreen buffer)
 }
 
 
+float worldZtoScreenZ(float z)
+{
+  return depthScale + -depthScale*((abs(z)<EPSILON) ? 0f : 525f/z);
+}
+
+
 /////////////////////////////////////////////
 //  DRAW
 //
@@ -210,8 +231,12 @@ void draw()
   // update the Kinect cam
   context.update();
 
-  for (int i=1; i<3; i++)
+//  for (int i=1; i<3; i++)
+if (currentId > -1)
   {
+  int i = currentId;
+  
+  
     // draw the skeleton if it's available
     if (context.isTrackingSkeleton(i))
     {  
@@ -219,9 +244,9 @@ void draw()
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_LEFT_SHOULDER, leftShoulderPos);
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_RIGHT_SHOULDER, rightShoulderPos);
 
-      context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_LEFT_HIP, leftHipPos);
 
-      context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_RIGHT_HIP, rightHipPos);
+      context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_LEFT_ELBOW, leftElbowPos);
+      context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_RIGHT_ELBOW, rightElbowPos);
 
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_HEAD, facePos);
       context.getJointPositionSkeleton(i, SimpleOpenNI.SKEL_NECK, neckPos);
@@ -236,19 +261,22 @@ void draw()
       context.convertRealWorldToProjective(leftShoulderPos, leftShoulderPos);
       context.convertRealWorldToProjective(rightShoulderPos, rightShoulderPos);
 
-      context.convertRealWorldToProjective(rightHipPos, rightHipPos);
-      context.convertRealWorldToProjective(leftHipPos, leftHipPos);
-
       context.convertRealWorldToProjective(neckPos, neckPos);
       context.convertRealWorldToProjective(facePos, facePos);      
 
       context.convertRealWorldToProjective(rightHandPos, rightHandPos);
       context.convertRealWorldToProjective(leftHandPos, leftHandPos);
 
-      leftHandPos.z = height/4 + -height/4*((abs(leftHandPos.z)<EPSILON) ? 0f : 525f/leftHandPos.z);
+      leftHandPos.z = worldZtoScreenZ(leftHandPos.z);
 
       context.convertRealWorldToProjective(leftFootPos, leftFootPos);
       context.convertRealWorldToProjective(rightFootPos, rightFootPos);
+
+      facePos.z = worldZtoScreenZ(facePos.z);
+      neckPos.z = worldZtoScreenZ(neckPos.z);
+      rightElbowPos.z = worldZtoScreenZ(rightElbowPos.z);
+
+      leftElbowPos.z = worldZtoScreenZ(leftElbowPos.z);
 
 
       if (go)
@@ -324,11 +352,27 @@ void draw()
   // udpate rotation
   //  rotation.addSelf(0.014, 0.0237);
   if (go)
-    rotation.set(map(md.prev_x, 0, 640, -0.05, 0.05), 0.0237);
+    rotation.set(map(md.prev_x, 0, 640, -0.01, 0.01), 0.0057);
   // popMatrix();
 
   CameraState camState = cam.getState();
 
+  cam.beginHUD();
+  //tint(255,40);
+  image(leftBuffer.getTexture(), 0, 0, width/2, height);
+  image(rightBuffer.getTexture(), width/2, 0, width/2, height);
+  if (drawBG)
+  {
+    // draw depthImageMap
+    //    image(context.depthImage(), 0, 0, width/2, height);
+    //    image(context.depthImage(), width/2, 0, width/2, height);
+
+    image(context.sceneImage(), 0, 0, width/2, height);
+    image(context.sceneImage(), width/2, 0, width/2, height);
+  }
+  cam.endHUD();
+ //noTint();
+ 
   cam.rotateX(-rotation.x);
   cam.rotateY(-rotation.y);
 
@@ -353,18 +397,6 @@ void draw()
 
   //cam.rotateY(-rotation.y);
   //cam.rotateX(-rotation.x);
-
-
-  cam.beginHUD();
-  image(leftBuffer.getTexture(), 0, 0, width/2, height);
-  image(rightBuffer.getTexture(), width/2, 0, width/2, height);
-  if (drawBG)
-  {
-    // draw depthImageMap
-    image(context.depthImage(), 0, 0, width/2, height);
-    image(context.depthImage(), width/2, 0, width/2, height);
-  }
-  cam.endHUD();
 }
 
 
@@ -412,6 +444,7 @@ void onNewUser(int userId)
 {
   println("onNewUser - userId: " + userId);
   println("  start pose detection");
+  if (currentId == -1)drawBG = true;
 
   context.startPoseDetection("Psi", userId);
 }
@@ -419,6 +452,11 @@ void onNewUser(int userId)
 void onLostUser(int userId)
 {
   println("onLostUser - userId: " + userId);
+  if (userId == currentId)
+  {
+    currentId = -1;
+    drawBG = true;
+  }
 }
 
 void onStartCalibration(int userId)
@@ -435,6 +473,8 @@ void onEndCalibration(int userId, boolean successfull)
     println("  User calibrated !!!");
     context.startTrackingSkeleton(userId);
     drawBG = false;
+    currentId = userId;
+    md.reset();
   } 
   else 
   { 
@@ -463,7 +503,7 @@ void keyReleased()
 {
   switch(key)
   {
-    case '1': 
+  case '1': 
     panAmt += 0.1;
     break;
 

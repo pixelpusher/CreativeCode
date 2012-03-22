@@ -4,7 +4,7 @@ class MoveDetect
   float prev_x, prev_y, prev_z;
   public static final int numPlotSamples = 256;
   float[] mFunction;
-  float thresh = 80;
+  float thresh = 20;
   float SMOOTHING = 0.2f;
   float cursample;
   
@@ -24,7 +24,13 @@ class MoveDetect
      lastStateChange = 0;
   }
   
-  
+  void reset()
+  {
+    onsetState = 0;
+     swipeStart = 0;
+     swipeEnd = 0;
+     lastStateChange = 0;
+  }
   
   
   // plots the movement function as a signal on the screen
@@ -73,7 +79,7 @@ class MoveDetect
      // onSwipe(joint);
     }
     
-    if (diff < 20)
+    if (diff < 5)
     {
       onsetStateVerify(0); 
     }
