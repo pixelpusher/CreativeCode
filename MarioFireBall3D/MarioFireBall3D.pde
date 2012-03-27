@@ -24,6 +24,8 @@ TriangleMesh origMesh, mesh;
 AxisAlignedCylinder cyl;
 PeasyCam cam;
 
+color userColors[]; 
+
 float MESH_X_SCALE = 10.0;
 float MESH_Y_SCALE = 10.0;
 GLGraphicsOffScreen leftBuffer, rightBuffer;
@@ -31,14 +33,18 @@ float panAmt = -4.6;
 float panAngle = -0.04;
 float depthScale;
 
+IntVector userList;
 
-void init() {
+PVector[] userCoMs;
+
+void init() 
+{
   frame.dispose();  
   frame.setUndecorated(true);
   super.init();
 }
 
-ImageParticleSwarm swarm;
+ImageParticleSwarm swarms[];
 ParticleExpander particleExpander;
 
 
@@ -58,7 +64,6 @@ boolean mouseWasDown = false;
 float MIN_DIST = 2.0f;
 float weight=0;
 
-LinkedList<ImageParticleSwarm> swarms;
 GLTexture fireballTex;
 
 // images for body parts and background:
@@ -92,7 +97,7 @@ PVector rightFootPos = new PVector();
 
 // Kinect-specific variables
 SimpleOpenNI  context;
-MoveDetect md;
+MoveDetect[] md;
 
 
 int currentId = -1;
@@ -115,7 +120,31 @@ void setup()
   //cam.pan(-panAmt, 0);
 
   context = new SimpleOpenNI(this);
-  md = new MoveDetect();
+  md = new MoveDetect[16];
+
+  for (int m=0; m<md.length; m++)
+    md[m] = new MoveDetect();
+
+  userCoMs = new PVector[16];
+  for (int v=0; v<userCoMs.length; v++)
+//  for (PVector v : userCoMs)
+    userCoMs[v] = new PVector();
+
+  userList = new IntVector();
+
+  userColors = new color[16];
+
+ swarms = new ImageParticleSwarm[16];
+ 
+ for (int s=0; s < swarms.length; s++)
+ {
+   swarms[s] = null;
+ }
+
+  for (int i=0; i<16; i++)
+  {
+    userColors[i] = color(random(0, 255), random(0, 255), random(0, 255));
+  }
 
   // enable depthMap generation 
   context.enableDepth();
@@ -134,7 +163,7 @@ void setup()
   depthScale = height/4f;
 
   // create fireball particle "swarm"
-  swarms = new LinkedList<ImageParticleSwarm>();
+
   particleExpander = new ParticleExpander();
 
   // fire trail
@@ -163,7 +192,6 @@ void setup()
 
 void drawIntoBuffer(GLGraphicsOffScreen buffer)
 {
-
   buffer.beginDraw();
   buffer.camera();
   //buffer.lights();
@@ -173,6 +201,18 @@ void drawIntoBuffer(GLGraphicsOffScreen buffer)
   buffer.fill(255, 180);
   buffer.noStroke(); 
   renderer = buffer; 
+
+  for (int u=0; u< userList.size(); u++)
+  {
+    int user = userList.get(u);
+    PVector pos = userCoMs[user];
+
+    buffer.pushMatrix();
+    buffer.translate(pos.x, pos.y, pos.z);
+    fill(userColors[user]);
+    buffer.ellipse(0, 0, 200, 200);
+    buffer.popMatrix();
+  }  
   //renderRectFromVectors( leftElbowPos, leftHandPos, 20);
   renderRectFromVectors( facePos, neckPos, 20);
 
@@ -195,11 +235,17 @@ void drawIntoBuffer(GLGraphicsOffScreen buffer)
 
   int currentTime = millis();
 
-  for (ImageParticleSwarm swarm : swarms)
+
+  for (int s = 0; s < swarms.length; s++)
   {
-    if (go)
-      swarm.update(particleExpander, currentTime);
-    swarm.render(buffer);
+    ImageParticleSwarm swarm = swarms[s];
+
+    if (swarm != null)
+    {
+      if (go)
+        swarm.update(particleExpander, currentTime);
+      swarm.render(buffer);
+    }
   }
 
   buffer.setDepthMask(true);
@@ -222,6 +268,7 @@ float worldZtoScreenZ(float z)
 }
 
 
+
 /////////////////////////////////////////////
 //  DRAW
 //
@@ -231,12 +278,25 @@ void draw()
   // update the Kinect cam
   context.update();
 
-//  for (int i=1; i<3; i++)
-if (currentId > -1)
+  int userCount = context.getNumberOfUsers();
+  if (userCount > 0)
   {
-  int i = currentId;
+  context.getUsers(userList);
+
+  for (int u=0; u< userList.size(); u++)
+  {
+    int user = userList.get(u);
   
-  
+    context.getCoM(user, userCoMs[user]);
+
+    int i = user;
+
+    //  for (int i=1; i<3; i++)
+    //if (currentId > -1)
+    //  {
+    //  int i = currentId;
+
+
     // draw the skeleton if it's available
     if (context.isTrackingSkeleton(i))
     {  
@@ -282,22 +342,22 @@ if (currentId > -1)
       if (go)
       {
         // calculate new joint movement function sample
-        md.jointMovementFunction(i, SimpleOpenNI.SKEL_LEFT_HAND);
+        md[i].jointMovementFunction(i, SimpleOpenNI.SKEL_LEFT_HAND);
 
-        if (md.swipeStart == 1)
+        if (md[i].swipeStart == 1)
         {
           handJerked();
 
           //println("ONSET START:::::" + millis());
         }
-        else if (md.onsetState == 1)
+        else if (md[i].onsetState == 1)
         {
           handMoved();
         }
         else
-          if (md.swipeEnd == 1)
+          if (md[i].swipeEnd == 1)
           {
-            newSwarm(fireballTex, triMesh);
+            newSwarm(fireballTex, triMesh, i);
             //println("ONSET END:::::" + millis());
           }
       }
@@ -333,27 +393,9 @@ if (currentId > -1)
     // end for each user detected
   }
 
-
-
-  // draw particle systems
-  // rotate around center of screen (accounted for in mouseDragged() function)
-
-  /*
-  drawHandPositions();
-   
-   
-   // draw mesh as polygon (in white)
-   drawMesh();
-   
-   // draw mesh unique points only (in green)
-   drawMeshUniqueVerts();
-   */
-
-  // udpate rotation
-  //  rotation.addSelf(0.014, 0.0237);
-  if (go)
-    rotation.set(map(md.prev_x, 0, 640, -0.01, 0.01), 0.0057);
-  // popMatrix();
+  }
+  //  if (go)
+  //    rotation.set(map(mouseX, 0, 640, -0.01, 0.01), 0.0057);
 
   CameraState camState = cam.getState();
 
@@ -371,8 +413,8 @@ if (currentId > -1)
     image(context.sceneImage(), width/2, 0, width/2, height);
   }
   cam.endHUD();
- //noTint();
- 
+  //noTint();
+
   cam.rotateX(-rotation.x);
   cam.rotateY(-rotation.y);
 
@@ -406,37 +448,6 @@ void vertex(Vec3D v) {
 
 
 
-
-
-// draw the skeleton with the selected joints
-void drawSkeleton(int userId)
-{
-  stroke(255);
-  strokeWeight(2);
-
-  context.drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
-
-  context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_LEFT_ELBOW);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_ELBOW, SimpleOpenNI.SKEL_LEFT_HAND);
-
-  context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_RIGHT_SHOULDER);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_RIGHT_ELBOW);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_ELBOW, SimpleOpenNI.SKEL_RIGHT_HAND);
-
-  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_SHOULDER, SimpleOpenNI.SKEL_TORSO);
-
-  context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_LEFT_HIP);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_HIP, SimpleOpenNI.SKEL_LEFT_KNEE);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_LEFT_KNEE, SimpleOpenNI.SKEL_LEFT_FOOT);
-
-  context.drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
-  context.drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);
-}
-
-
 // -----------------------------------------------------------------
 // SimpleOpenNI events
 
@@ -444,7 +455,7 @@ void onNewUser(int userId)
 {
   println("onNewUser - userId: " + userId);
   println("  start pose detection");
-  if (currentId == -1)drawBG = true;
+  //  if (currentId == -1) drawBG = true;
 
   context.startPoseDetection("Psi", userId);
 }
@@ -452,11 +463,20 @@ void onNewUser(int userId)
 void onLostUser(int userId)
 {
   println("onLostUser - userId: " + userId);
-  if (userId == currentId)
-  {
-    currentId = -1;
+
+  swarms[userId].destroy();
+  swarms[userId] = null;
+
+  context.getUsers(userList);
+
+  if ( userList.size() < 1)
     drawBG = true;
-  }
+
+  //  if (userId == currentId)
+  //  {
+  //    currentId = -1;
+  //    drawBG = true;
+  //  }
 }
 
 void onStartCalibration(int userId)
@@ -474,7 +494,7 @@ void onEndCalibration(int userId, boolean successfull)
     context.startTrackingSkeleton(userId);
     drawBG = false;
     currentId = userId;
-    md.reset();
+    md[userId].reset();
   } 
   else 
   { 
@@ -550,17 +570,7 @@ void keyReleased()
   {
     switch(keyCode)
     {
-    case UP: 
-      md.SMOOTHING += 0.05;
-      break;
-
-    case DOWN: 
-      md.SMOOTHING -= 0.05;
-      break;
     }
-
-    md.SMOOTHING = constrain(md.SMOOTHING, 0.0f, 1.0f);
-    println("SMOOTHING: " + md.SMOOTHING);
   }
 }
 

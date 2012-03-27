@@ -208,7 +208,7 @@ class ImageParticleSwarm
 
   void update(ParticleBehaviour particleBehaviour, int currentTime )
   {
-    if (mAlive)
+    if (mAlive && glmodel != null)
     {
       int timeDiff = currentTime-mCreationTime;
       if (timeDiff >= mLifeTime)

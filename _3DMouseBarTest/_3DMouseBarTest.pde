@@ -1,26 +1,15 @@
-/**
- * <p>Tiny demo showing usage of STLReader class to load binary STL files
- * and display them (with face normals). There're 2 example meshes provided
- * with one of them having been exported using a flipped Y axis. The TriangleMesh
- * class has a convenient method to reorient all faces.</p>
- */
-
 /* 
- * Copyright (c) 2010 Karsten Schmidt
+ * Copyright (c) 2012 Evan Raskob
  * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * for testing out realtime interactive rendering to 3D tv screens (that take dual images) 
  * 
- * http://creativecommons.org/licenses/LGPL/2.1/
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * General Public License 3.0 for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public
+ * You should have received a copy of the GNU General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
@@ -41,11 +30,11 @@ TriangleMesh origMesh, mesh;
 AxisAlignedCylinder cyl;
 PeasyCam cam;
 
-float MESH_X_SCALE = 10.0;
-float MESH_Y_SCALE = 10.0;
+float MESH_X_SCALE = 60.0;
+float MESH_Y_SCALE = 60.0;
 PGraphics leftBuffer, rightBuffer;
 float panAmt = -4.6;
-float panAngle = -0.02;
+float panAngle = -0.04;
 
 void init() {
   frame.dispose();  
@@ -88,7 +77,7 @@ void draw()
   //scale(0.5,0.5);
   p1.set(mouseX/2-width/2, mouseY-height/2, height/2); // mouse pos on screen
 
-  p3 = p1.sub(0, 200, 4*height);  // just for testing
+  p3 = p1.sub(0, 60, 2*height);  // just for testing
 
   //cam.getState().apply(picker.getBuffer());
   
