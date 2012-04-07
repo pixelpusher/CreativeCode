@@ -1,0 +1,11 @@
+<filter name="gaussian blur">
+    <description>3x3 Gaussian blur convolution filter</description>
+    <fragment>SimpleVS.glsl</fragment>
+    <fragment>Blur.glsl</fragment>
+    <textures input="1" output="1">
+        <intexture type="sampler2d" name="tex" offset="offset" label="Input image">0</intexture>
+    </textures>
+    <parameters>
+        <parameter type="float" name="blurThresh" label="Brightness threshold">0.2</parameter>
+    </parameters>
+</filter>

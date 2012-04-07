@@ -31,16 +31,22 @@ public class BoxRenderer implements BodyPartRenderer
 
   public BoxRenderer(PGraphics g)
   {
-    renderer = g;
-//    rendererScaleW = renderer.width/((float)app.g.width);
-//    rendererScaleH = renderer.height/((float)app.g.height);
+    setRenderer(g);
   }
 
   public void setRenderer(PGraphics g)
   {
     renderer = g;
-    rendererScaleW = renderer.width/((float)app.width);
-    rendererScaleH = renderer.height/((float)app.height);
+    if (app != null)
+    {
+      rendererScaleW = renderer.width/((float)app.width);
+      rendererScaleH = renderer.height/((float)app.height);
+    }
+    else
+    {
+      rendererScaleW = 1f;
+      rendererScaleH = 1f;
+    } 
   }
 
   public void setSkeleton(Skeleton s)

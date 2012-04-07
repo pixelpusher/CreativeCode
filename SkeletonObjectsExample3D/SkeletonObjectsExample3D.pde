@@ -111,7 +111,6 @@ size(screenWidth, screenHeight, GLConstants.GLGRAPHICS);
 
   gui = new ControlP5(this);
 
-
   println("set size");
 
   screenWidthToKinectWidthRatio = width/640.0f;
