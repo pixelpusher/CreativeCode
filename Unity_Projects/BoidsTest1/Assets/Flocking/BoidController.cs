@@ -10,7 +10,8 @@ public class BoidController : MonoBehaviour
 	public float minSpeed = 5f;
 	public float maxSpeed = 20f;
 	public float maxForce = 0.1f;
-	public float cohesionWeight = 2f;
+	public float cohesionWeight = 0.6f;
+	public float separationWeight = 0.3f;
 	public float targetAttraction = 0.1f;
 	
 	public float neighborDist = 10f;
@@ -62,6 +63,7 @@ public class BoidController : MonoBehaviour
 			boid.mTargetAttraction = targetAttraction;
 			boid.mNeighborMaxDist = neighborDist;
 			boid.mCohesionWeight = cohesionWeight;
+			boid.mSeparationWeight = separationWeight;
 			//boid.steer(target);
 			boid.flock(boids, avoidList);
 			boid.move(collider.bounds);

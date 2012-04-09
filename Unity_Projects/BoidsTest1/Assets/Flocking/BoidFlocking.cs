@@ -28,32 +28,36 @@ public class BoidFlocking : MonoBehaviour
 	/// A <see cref="System.Single"/>
 	/// </param>
 	public void move (Bounds outerBounds)
-	{
-		
+	{	
 		Vector3 diff = target - rigidbody.transform.position;
 		diff = mTargetAttraction*diff;
-		rigidbody.AddRelativeForce (diff);
+		//rigidbody.AddRelativeForce (diff);
 		
 		Vector3 force = Vector3.ClampMagnitude (acc, mMaxForce);
 		
-		//if (outerBounds.SqrDistance(rigidbody.transform.position) < Mathf.Epsilon)
+		force += diff;
 		
 		if (!outerBounds.Contains(rigidbody.worldCenterOfMass))
 		{
+			// a few options if it goes out of bounds...
+			
 			//rigidbody.velocity = -rigidbody.velocity;
 			
-			//rigidbody.position = outerBounds.center;
-			/*
+			// respawn!
+			/*rigidbody.position = outerBounds.center;
+			
 			rigidbody.velocity = new Vector3(
 							Random.value * mMaxSpeed,
 							Random.value * mMaxSpeed,
 							Random.value * mMaxSpeed);
-							*/
+			*/
 		}	
 		else
 		{
-			rigidbody.AddRelativeForce (force);
-			//rigidbody.AddForceAtPosition(force, rigidbody.transform.localPosition+force.normalized*rigidbody.transform.localScale.magnitude);
+			// these next 3 lines rotate the capsule / prefab properly, then propel it forwards
+			Vector3 dir = force.normalized;
+			rigidbody.transform.rotation = Quaternion.LookRotation(dir);
+			rigidbody.AddRelativeForce (force.magnitude * Vector3.forward);
 			
 			if (rigidbody.velocity.sqrMagnitude >  mMaxSpeed)
 			{
@@ -64,9 +68,6 @@ public class BoidFlocking : MonoBehaviour
 				rigidbody.velocity = rigidbody.velocity.normalized*mMinSpeed;
 			}
 		}
-		
-		// should set look rotation??
-		rigidbody.rotation.SetLookRotation(rigidbody.velocity.normalized);
 		
 		// reset acceleration
 		acc *= 0;
