@@ -93,7 +93,10 @@ public class BoidFlocking : MonoBehaviour
 										
 					//separation
 					Vector3 neighborRepulsion = transform.localPosition - other.rigidbody.transform.localPosition;
-					separation += neighborRepulsion.normalized / mNeighborMaxDist;
+					//float distFactor = Mathf.Min(0.1f, 1f/(neighborDistance-mNeighborMaxDist));
+					//separation += neighborRepulsion.normalized * distFactor;
+					
+					separation += neighborRepulsion / mNeighborMaxDist;
 					
 					//cohesion
 					cohesion += other.rigidbody.transform.localPosition;
