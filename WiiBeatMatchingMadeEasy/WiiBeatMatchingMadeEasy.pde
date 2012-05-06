@@ -1,6 +1,9 @@
 /*
  * Using classes to create "beats".
  * This is basically a primitive sequencer, of sorts.
+ * Uses a Wii Nunchuck connected to an Arduino as a controller using a modified
+ * version of this: http://arduino.cc/playground/Main/WiiChuckClass
+ * which can be found at http://github.com/pixelpusher/CreativeCode/
  *
  * By Evan Raskob 2012
  *
@@ -24,6 +27,10 @@ void setup()
   size(512, 384);
   noStroke();
   smooth();
+
+  // setup WiiChuck stuffs
+  setupWiiChuck();
+
   lastTime = millis();
 
   beats = new Beat[4];
@@ -91,19 +98,26 @@ void draw()
   fill(255);
   text("Tap spacebar to \nset the tempo", width/2, 40);
 
-
   int ms = millis();
 
   // update beat objects in motions
   for (int b=0; b<beats.length; b++)
     beats[b].update(ms);
 
+  float f1 = map(chuck1.stickY, -100,100,0,255);
+  float f2 = map(chuck1.stickX, -100,100,0,255);
+
   pushMatrix();
   float eSize = beats[0].getCurrentBeat()*width/12;
   translate(width/6, height/2);
-  fill(255, 0, 0, 100);
+  
+  colorMode(HSB);
+  
+  fill(f1, f2, 200, 100);
   ellipse(0, 0, eSize, eSize);
-  fill(0, 255, 255, 200);
+  
+  colorMode(RGB);
+  fill(255, 200);
   text(1+int(beats[0].getPartialBeat() ), 0, 0);
 
 
@@ -128,28 +142,35 @@ void draw()
   text("BPM:" + 60000/medianTime, width/2, height-20);
 }
 
+
+
+void tapTempo()
+{
+  int currentTime = millis();
+  int timeInterval = currentTime - lastTime;
+  lastTime = currentTime;
+
+  if (timeInterval < MAX_BEAT_INTERVAL)
+  {
+
+    intervals[index] = timeInterval;
+    index = (index + 1) % intervals.length;
+    intervals = sort(intervals);
+    medianTime = intervals[(intervals.length-1)/2];  /// middle element
+
+    for (int b=0; b<beats.length; b++)
+      beats[b].setBeatInterval( (int)pow((b+1), 2) * medianTime );
+    //println("Median time:" + medianTime);
+  }
+}
+
 void keyPressed()
 {
   if (!keyDown)
   {
     keyDown = true;
-    int currentTime = millis();
-    int timeInterval = currentTime - lastTime;
-    lastTime = currentTime;
-    
-    if (timeInterval < MAX_BEAT_INTERVAL)
-    {
 
-      intervals[index] = timeInterval;
-      index = (index + 1) % intervals.length;
-      intervals = sort(intervals);
-      medianTime = intervals[(intervals.length-1)/2];  /// middle element
-
-      for (int b=0; b<beats.length; b++)
-        beats[b].setBeatInterval( (int)pow((b+1), 2) * medianTime );
-      //println("Median time:" + medianTime);
-    }
-    
+    tapTempo();
   }
 }
 
@@ -157,5 +178,4 @@ void keyReleased()
 {
   keyDown = false;
 }
-
 
