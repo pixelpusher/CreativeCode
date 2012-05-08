@@ -22,10 +22,10 @@ class WiiChuck
 
   // button states
   final static int UP = 0;
-  final int PRESSED = 1;
-  final int HELD = 2;  // anything greater than PRESSED means held (and we keep counting...)
+  final static int PRESSED = 1;
+  final static int HELD = 2;  // anything greater than PRESSED means held (and we keep counting...)
 
-  final int NUM_VALUES = 9;
+  final static int NUM_VALUES = 9;
 
   int zButton, cButton, zPressed, cPressed; // should be above states only - could use enum but I'm lazy today
 
@@ -42,59 +42,66 @@ class WiiChuck
   {
     listeners.add(wiiLi);
   }
-  
+
   void removeListener(IWiiChuckListener wiiLi)
   {
     listeners.remove(wiiLi);
   }
-  
+
 
   void update(String values[])  // for converting from Serial object
   {
     if (values.length == NUM_VALUES)
-      update(int(values[0]), int(values[1]), int(values[2]), int(values[3]), int(values[4]), int(values[5]), 
-      int(values[6]), int(values[7]), int(values[8]));
-  }
-
-  void update(int _roll, int _pitch, int _ax, int _ay, int _az, int _stickX, int _stickY, int _zPressed, int _cPressed)
-  {
-    roll =  _roll * DEG_TO_RAD;
-    pitch =  _pitch * DEG_TO_RAD;
-
-    ax = _ax;
-    ay = _ay;
-    az = _az;  
-
-    stickX = _stickX;
-    stickY = _stickY;
-
-    //zButton = _zButton; // if held, keep counting...
-    //cButton = _cButton;
-
-    zPressed = _zPressed;
-    cPressed = _cPressed;
-
-    for ( IWiiChuckListener wiiLi : listeners)
     {
-      wiiLi.stateUpdated( this );
+      /*
+      print("VALUES:" );
+       for (int i=0; i<values.length; ++i)
+       print(" ["+i+"]:"+values[i]);
+       println();
+       */
 
-      if (zPressed == 1)  
-      {
-        zPressed = PRESSED;
-        wiiLi.zPressed();
-      }
-      else
-        zPressed = this.UP;
+      int _roll=int(values[0]);
+      int _pitch=int(values[1]);
+      int _ax=int(values[2]);
+      int _ay=int(values[3]);
+      int _az=int(values[4]);
+      int _stickX=int(values[5]);
+      int _stickY=int(values[6]);
+      int _zPressed=int(values[7]);
+      int _cPressed=int(trim(values[8])); // get rid of whitespace!
 
-      if (cPressed == 1)
+      roll =  _roll * DEG_TO_RAD;
+      pitch =  _pitch * DEG_TO_RAD;
+
+      ax = _ax;
+      ay = _ay;
+      az = _az;  
+
+      stickX = _stickX;
+      stickY = _stickY;
+
+      //zButton = _zButton; // if held, keep counting...
+      //cButton = _cButton;
+
+      zPressed = _zPressed;
+      cPressed = _cPressed;
+
+      for ( IWiiChuckListener wiiLi : listeners)
       {
-        cPressed = PRESSED;
-        wiiLi.cPressed();
+        wiiLi.stateUpdated( this );
+
+        if (zPressed == PRESSED)  
+        {
+          wiiLi.zPressed();
+        }
+
+        if (cPressed == PRESSED)
+        {
+          wiiLi.cPressed();
+        }
       }
-      else
-        cPressed = this.UP;
+      if (debug) println(this.toString());
     }
-    if (debug) println(this.toString());
   }
 
   void destroy()

@@ -32,12 +32,12 @@ void setupWiiChuck()
   chuck1.addListener( new IWiiChuckListener() {
     public void zPressed()
     {
-      println("Z!!!");
+      println("Z!!! " + millis());
       tapTempo();
     }
     public void cPressed()
     {
-      println("C!!!");      
+      println("C!!!" + millis());      
     }
     public void stateUpdated(WiiChuck chuck) { }
   } );

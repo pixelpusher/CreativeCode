@@ -48,7 +48,10 @@ void setup()
     {
       println("C!!!");      
     }
-    public void stateUpdated(WiiChuck chuck) { }
+    public void stateUpdated(WiiChuck chuck) { 
+    //println("CPRESSED:" + chuck.cPressed);
+    
+    }
   } );
   
 } 

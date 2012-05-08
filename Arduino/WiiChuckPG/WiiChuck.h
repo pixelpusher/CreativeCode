@@ -84,7 +84,7 @@ private:
 
   uint16_t holdCycles; // number of cycles button is held down, for re-calibration
 
-  bool lastZ, lastC;
+  bool lastZ, lastC, zPress, cPress;
 
 
 public:
@@ -96,6 +96,10 @@ public:
 
   void begin()
   {
+    
+    pinMode(2,OUTPUT);
+    pinMode(3,OUTPUT);
+    
     //Set power pinds
     DDRC |= _BV(pwrpin) | _BV(gndpin);
 
@@ -111,6 +115,8 @@ public:
     Wire.begin();
     cnt = 0;
     averageCounter = 0;
+    zPress = cPress = false;
+    
     // instead of the common 0x40 -> 0x00 initialization, we
     // use 0xF0 -> 0x55 followed by 0xFB -> 0x00.
     // this lets us use 3rd party nunchucks (like cheap $4 ebay ones)
@@ -139,7 +145,8 @@ public:
   }
 
 
-  void calibrateJoy() {
+  void calibrateJoy() 
+  {
     zeroJoyX = joyX;
     zeroJoyY = joyY;
   }
@@ -154,9 +161,14 @@ public:
       ++cnt;
     }
 
-    if (cnt > 5) {
+    if (cnt > 5) 
+    {  
       lastZ = buttonZ;
       lastC = buttonC;
+    
+      digitalWrite(2,buttonZ);
+      digitalWrite(3,buttonC);
+      
       lastJoyX = readJoyX();
       lastJoyY = readJoyY();
 
@@ -185,6 +197,14 @@ public:
 
       buttonZ = !( status[5] & B00000001);
       buttonC = !((status[5] & B00000010) >> 1);
+      
+      // changed these - presses stay true until they are received
+      if (buttonZ && !lastZ)
+        zPress = true;
+      
+     if (buttonC && !lastC)
+        cPress = true;
+       
       _send_zero(); // send the request for next bytes
 
       if (buttonZ && lastZ) 
@@ -194,8 +214,6 @@ public:
       } 
       else 
         holdCycles = 0;
-
-
     }
   }
 
@@ -204,8 +222,8 @@ public:
   //    return status;
   //}
 
-  float readAccelX() {
-
+  float readAccelX() 
+  {
     // total = 0; 
     // accelArray[xyz][averageCounter] * FAST_WEIGHT;
     return (float)angles[0] - ZEROX;
@@ -221,11 +239,22 @@ public:
     return (float)angles[2] - ZEROZ;
   }
 
-  bool zPressed() {
-    return (buttonZ && ! lastZ);
+  bool zPressed() 
+  {
+    
+    bool result = zPress;
+    zPress = false; // make sure
+    return result;
+    //    return (buttonZ && ! lastZ);
+    
   }
-  bool cPressed() {
-    return (buttonC && ! lastC);
+  bool cPressed() 
+  {
+    bool result = cPress;
+    cPress = false; // ma
+    return result;
+    
+    //return (buttonC && ! lastC);
   }
 
   // for using the joystick like a directional button
@@ -255,17 +284,17 @@ public:
 
 
   // returns roll degrees
-  int readRoll() {
+  inline int readRoll() {
     return (int)(atan2(readAccelX(),readAccelZ())/ M_PI * 180.0);
   }
 
   // returns pitch in degrees
-  int readPitch() {        
+  inline int readPitch() {        
     return (int) (acos(readAccelY()/RADIUS)/ M_PI * 180.0);  // optionally swap 'RADIUS' for 'R()'
   }
 
 private:
-  uint8_t _nunchuk_decode_byte (uint8_t x)
+  inline uint8_t _nunchuk_decode_byte (uint8_t x)
   {
     //decode is only necessary with certain initializations
     //x = (x ^ 0x17) + 0x17;

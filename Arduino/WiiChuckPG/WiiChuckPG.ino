@@ -26,7 +26,7 @@ void setup() {
 
 
 void loop() {
-  delay(25);
+  delay(50);
   chuck.update(); 
 
 
