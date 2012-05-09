@@ -20,10 +20,13 @@ class Beat
 
   private ArrayList<IBeatListener> listeners;
 
+  private boolean reset;
+
   Beat()
   {
     _lastTime = millis();
     listeners = new ArrayList<IBeatListener>();
+    reset = true;
   }
 
   Beat(int mb)
@@ -31,6 +34,7 @@ class Beat
     maxBeats = mb;
     listeners = new ArrayList<IBeatListener>(); 
     _lastTime =  millis();
+    reset = true;
   } 
 
   int getMaxBeats()
@@ -78,8 +82,9 @@ class Beat
   void reset(int startTimeMillis)
   {
     partialBeat = 0f;
-    _currentBeat = lastBeat = 0;
+    _currentBeat  = lastBeat = 0;
     _lastTime = startTimeMillis;
+    reset = true;
   }
 
   void reset()
@@ -122,9 +127,15 @@ class Beat
     // get beat interval
     int _interval = (currentTimeMillis - _lastTime);
 
-    // see if a beat worth of time has elapsed
-    if (_interval > beatInterval)
+    if (reset)
     {
+      reset = false;
+      lastBeat = -1;
+    }      
+    else
+    if (_interval > beatInterval)     // see if a beat worth of time has elapsed
+    {
+      
       //increment current beat
       _currentBeat = (_currentBeat + 1) % maxBeats;
 
@@ -144,6 +155,8 @@ class Beat
     // check if beat changed
     if (lastBeat != _currentBeat)
     {
+      println("beat:"+_currentBeat+"/"+lastBeat);
+      
       lastBeat = _currentBeat;
       
       for (IBeatListener ibl : listeners)
