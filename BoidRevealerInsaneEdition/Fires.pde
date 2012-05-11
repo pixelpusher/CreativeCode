@@ -52,6 +52,8 @@ void setupFires(PGraphics renderer)
 
 
     DrawableNode fire = new ImageNode(fireImg, x, y, fireWidth*(1+fireOverlap), fireHeight*(1+fireOverlap));
+    fire.hasFill = true;
+    fire.fillColor = color(255,100);
     fire.rotation = random(0, TWO_PI); // all random rotations
     fire.rotationSpeed = fireRotationSpeed;
     fire.update();

@@ -21,6 +21,11 @@
 // GLGraphics for OPENGL rendering tricks: http://glgraphics.sourceforge.net/
 //
 
+//
+// TODO: flocks can die, push button to grown new ones
+// left/right to change scenes / speed
+// array of explosions? with lifetimes? placed at boids...
+
 
 import processing.opengl.*;
 import javax.media.opengl.*;
@@ -40,22 +45,29 @@ LinkedList<DrawableNode> nodesToCollide = null;
 DrawableNode myCharacter = null;
 ControlP5 gui;
 
+LinkedList<IAnimationModifier> cameraAnimations;
 
-
+boolean playing = true;
+boolean saveScreen = false;
 
 ColorPicker cpFill, cpStroke;
 
-String bgImageSrc = "carstiled.png";
-static final String spriteImages[] = { 
-  "tv.png", "blue-acrobats.png", "whitetoady.png", "fire128.png"
-};
 
 color tintColors[] = {
-  color(0,0,200), color(0, 128, 0), color(200, 0, 0), color(255, 0, 255),
+  color(0, 0, 250,180), color(0, 200, 0), color(200, 0, 0,180), color(255, 0, 255),
 };
 
 
-GLTexture bgImage, spriteTexs[];
+final String bgImageSrcs[] = { "carstiled.png", "rose.png", "roseBW.png", "BOOMBOXbg.png" };
+final String spriteImages[] = { 
+  "blue-acrobats.png", "tv.png", "boombox1_64.png", "adidasGold.png", 
+};
+//"boombox128x64.png"
+//
+//"whitetoady.png"
+
+GLTexture bgImages[], spriteTexs[];
+GLTexture currentBGTex;
 
 Flock[] flocks;
 final int FLOCKS = 4;
@@ -145,13 +157,19 @@ void setup()
 
   // textures
   spriteTexs = new GLTexture[spriteImages.length];
+  bgImages = new GLTexture[bgImageSrcs.length];
 
   for (int i=0; i < spriteImages.length; ++i)
   {
     spriteTexs[i] = new GLTexture(this, spriteImages[i]);
   }
 
-  bgImage = new GLTexture(this, bgImageSrc);
+  for (int i=0; i < bgImages.length; ++i)
+  {
+    bgImages[i] = new GLTexture(this, bgImageSrcs[i]);
+  }
+
+  currentBGTex = bgImages[0];
 
   //
   // setup flocks
@@ -202,6 +220,8 @@ void setup()
   // setup the GUI
   //
   setupGUI();
+
+  cameraAnimations = new LinkedList<IAnimationModifier>();
   setupBeatStuff();
 
   setupFires(offscreen);
@@ -214,10 +234,10 @@ void setup()
 
 void draw() 
 {
+  if (playing)
+    updateBeatStuff();
 
-  updateBeatStuff();
-
-    background(0);
+  background(0);
   hint(DISABLE_DEPTH_TEST);
 
   boolean b = gui.window(this).isMouseOver(); // returns true or false
@@ -346,11 +366,55 @@ void draw()
   //  ggl.glAlphaFunc(GL.GL_GREATER,0.0);
   gpgl.endGL();
 
+  // 
+  // CAMERA STUFF
+  // 
+
+  pushMatrix();
+
+  //
+  // --------------------------------------------
+  // Timed animations ---------------------------
+  // --------------------------------------------
+  //
+  // These are added by beat timelines (See BeatStuff.pde)
+
+  Iterator<IAnimationModifier> iter = cameraAnimations.iterator();
+
+  int ms = millis();
+
+  while (iter.hasNext ())
+  {
+    IAnimationModifier animod  = iter.next();
+    if (animod.isFinished())
+    {
+      animod.stop();
+      iter.remove();
+      animod = null;
+    }
+    else animod.update(ms);
+  }
+  // float p = map (millis() % 5000, 0, 4999, 0, 1 );
+
+  // scale on a point
+  //  translate( -p*width/2f ,0);
+  //  scale( (p*3+1) );
+
+  //move right
+  //translate( -width+p*width/2f, -height/2);
+  //scale(2);
+
+  // move left
+  //translate( -p*width/2f ,0);
+  //scale(2);
+
+
+
   // DRAW BACKGROUND IMAGE
 
   textureMode(NORMALIZED);
   beginShape(QUADS);
-  texture(bgImage);
+  texture(currentBGTex);
 
   vertex(0, 0, 0, 0);
   vertex(width/2, 0, 1, 0);
@@ -376,6 +440,19 @@ void draw()
   ggl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
   // ggl.glDisable( GL.GL_BLEND );
   gpgl.endGL();
+
+  popMatrix();
+
+  if (saveScreen)
+  {
+    saveScreen = false;
+    saveFrame("surreally_"+year()+"-"+hour()+"-"+minute()+"-"+second()+".png");
+  }
+  else
+  {
+    fill(255);
+    text("fps:"+frameRate, 12, 20);
+  }
 }
 
 
@@ -385,7 +462,6 @@ void draw()
 
 void keyPressed()
 {
-
   if (key == CODED) 
   {
     if (keyCode == UP) {
@@ -405,10 +481,16 @@ void keyPressed()
     if (!keyDown)
     {
       keyDown = true;
-      
+
       switch(key) 
       {
-
+      case 'p': 
+        playing = !playing;
+        break;
+      case 's': saveScreen = true;
+    break;  
+        
+/*
         case('s'):
         gui.getProperties().setSnapshot(presetName.getText());
         break;
@@ -432,7 +514,7 @@ void keyPressed()
         println("Loaded preset:" + "data/" + presetName.getText()+".ser");
         loadingGUIPreset = false;
         break;
-
+*/
         case(' '):    
         tapTempo();
         break;
@@ -451,5 +533,7 @@ void keyReleased()
 
 void mousePressed()
 {
+  for (int i=0; i < FLOCKS; ++i)
+    flocks[i].toReanimate++;
 }
 

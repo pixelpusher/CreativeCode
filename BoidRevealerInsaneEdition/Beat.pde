@@ -2,7 +2,7 @@
 public interface IBeatListener
 {
   public void beatChanged(int beat);  // when a beat changes value, e.g. from 0 to 1
-  public void beatReset();  // when a Beat object wraps back to 0 (counts out all the beats)
+  public void beatUpdated(float _partialBeat);  // when a Beat object is updated
 }
 
 
@@ -152,21 +152,19 @@ class Beat
 
     partialBeat =  (_currentBeat + (float)_interval/(float)beatInterval);
 
+
+    for (IBeatListener ibl : listeners)
+        ibl.beatUpdated( partialBeat );
+        
     // check if beat changed
     if (lastBeat != _currentBeat)
     {
-      println("beat:"+_currentBeat+"/"+lastBeat);
+      //println("beat:"+_currentBeat+"/"+lastBeat);
       
       lastBeat = _currentBeat;
       
       for (IBeatListener ibl : listeners)
         ibl.beatChanged( _currentBeat );
-
-      if (_currentBeat == 0)
-      {
-        for (IBeatListener ibl : listeners)
-          ibl.beatReset( );
-      }
     }      
     
     

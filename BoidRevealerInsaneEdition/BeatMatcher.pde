@@ -14,13 +14,10 @@ class BeatMatcher implements IBeatListener
   // array list of events for each beat, in order (e.g. beat 0..maxBeats has an arraylist of events attached to it)
   private BeatEventList[] events;
 
-  private BeatEventList resetEvents; // when beats are reset
-
 
   BeatMatcher(int maxBeats)
   {
     events = new BeatEventList[maxBeats];
-    resetEvents = new BeatEventList();
 
     for (int i=0; i<events.length; i++)
     {
@@ -28,23 +25,7 @@ class BeatMatcher implements IBeatListener
     }
   }
 
-  BeatMatcher addResetEvent(IBeatEvent ibe) 
-  {
-    resetEvents.add( ibe );
-    return this;
-  }
-
-  BeatMatcher removeResetEvent(IBeatEvent ibe) 
-  {
-    resetEvents.remove( ibe );
-    return this;
-  }
-
-  BeatMatcher clearResetEvents()  
-  {
-    resetEvents.clear(  );
-    return this;
-  }
+  public void beatUpdated(float partialBeat) { } // don't do anything
 
   BeatMatcher addBeatEvent(int beat, IBeatEvent ibe) 
   {
@@ -88,17 +69,9 @@ class BeatMatcher implements IBeatListener
     }
   }
 
-  public void beatReset()  // when a Beat object wraps back to 0 (counts out all the beats)
-  {
-    ListIterator<IBeatEvent> li = resetEvents.listIterator();
-    
-    while ( li.hasNext() )
-      li.next().trigger();
-  }
 
   public void clear()
   {
-    clearResetEvents();
     clearAllBeatEvents();
   }
 

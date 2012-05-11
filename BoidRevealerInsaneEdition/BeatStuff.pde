@@ -1,4 +1,15 @@
-final int MAX_BEAT_INTERVAL = 1500;  // max time between beats in ms
+//
+// This is where all the beat stuff kicks off.
+// The tempo is determined from the median time between taps (either on wii or keyboard) here.
+// Beat timelines (AKA Scenes) are created and initialised here.
+// Beat matchers which trigger animations are also created here, and
+// updated each frame.
+//
+// Beat animations might do things like change the boids speed, attraction, and anything else that can 
+// globally affect the animation
+
+
+final int MAX_BEAT_INTERVAL = 2000;  // max time between beats in ms
 
 int[] intervals = new int[3];
 int index = 0;
@@ -24,13 +35,13 @@ void updateBeatStuff()
   while (iter.hasNext ())
   {
     IAnimationModifier animod  = iter.next();
-    animod.update(ms);
     if (animod.isFinished())
     {
       animod.stop();
       iter.remove();
       animod = null;
     }
+    else animod.update(ms);
   }
 
   // update beat objects in motions
@@ -53,8 +64,9 @@ void updateBeatScene()
 {
   beatsCounted++;
 
-  if (beatsCounted >= beatsPerScene)
+  if (beatsCounted > beatsPerScene)
   {
+
     int newBeatIndex = int ( random(0, NUM_SCENES) );
     beats[newBeatIndex].reset();
     beatsCounted = 0;
@@ -108,6 +120,7 @@ void setupBeatStuff()
   lastTime = millis();
 
   beats = new Beat[NUM_SCENES];
+  beatsPerScene = int( random(1, 4)) * 4;
 
   animModifiers = new LinkedList<IAnimationModifier>();
 
@@ -126,22 +139,120 @@ void setupBeatStuff()
         println("Beat changed:" + beat);
       }
 
-      public void beatReset()
-      {
-        println("Beat reset");
+      public void beatUpdated(float partialBeat) { 
+        /*
+       float beat = beats[currentBeatIndex].partialBeat/4f; // 1/4
+         // scale on a point
+         translate( -(1f-beat)*width/2f, 0);
+         scale( ((1f-beat)*3+1) );
+         */
       }
     }
     );
   }
 
 
+  IBeatEvent scalePoint = new IBeatEvent() 
+  { 
+    public void trigger() 
+    { 
+      println("scalepoint");
+      IAnimationModifier animod = new IAnimationModifier()
+      { 
+        int r = int(random(1, 3000000));
+
+        public void stop() {
+        }
+        public void pause() {
+        }
+        public void start(int t) {
+        }
+        public void update(int t) 
+        {
+          float beat = beats[currentBeatIndex].getPartialBeat()/4f; // 1/4
+          // println(r+ " " +beat);
+          // scale on a point
+
+          translate( -(1f-beat)*width/3f, 0);
+          scale( ((1f-beat)*0.5+1) );
+        }
+
+        //animod.start(beats[0].beatInterval*4);
+        public boolean isFinished()
+        {
+          return false;
+        }
+      };
+      cameraAnimations.clear();
+      cameraAnimations.add( animod );
+    }
+  };
+
+
+
+  IBeatEvent moveRight = new IBeatEvent() 
+  { 
+    public void trigger() 
+    { 
+      println("moveright");
+
+      IAnimationModifier animod = new IAnimationModifier()
+      { 
+        int r = int(random(1, 3000000));
+
+        public void stop() {
+        }
+        public void pause() {
+        }
+        public void start(int t) {
+        }
+        public void update(int t) 
+        {
+          float beat = beats[currentBeatIndex].getPartialBeat()/4f; // 1/4
+          // println(r+ " " +beat);
+
+          //move right
+          translate( -width+3f*(1f-beat)*width/3f, -height/2);
+          scale(3);
+        }
+
+        //animod.start(beats[0].beatInterval*4);
+        public boolean isFinished()
+        {
+          return false;
+        }
+      };
+      cameraAnimations.clear();
+      cameraAnimations.add( animod );
+    }
+  };
+
+
+  // float p = map (millis() % 5000, 0, 4999, 0, 1 );
+
+  // scale on a point
+  //  translate( -p*width/2f ,0);
+  //  scale( (p*3+1) );
+
+  //move right
+  //translate( -width+p*width/2f, -height/2);
+  //scale(2);
+
+  // move left
+  //translate( -p*width/2f ,0);
+  //scale(2);
+
+
+
 
   BeatMatcher matcher1 = new BeatMatcher( beats[0].getMaxBeats() );
+
+  matcher1.addBeatEvent( 0, scalePoint);
 
   matcher1.addBeatEvent( 0, 
   new IBeatEvent() { 
     public void trigger() { 
-      println("Beat 1 MATCHED!");
+      //println("Beat 1 MATCHED!");
       IAnimationModifier animod = new TimedAnimationModifier()
       {        
         public void update(int t)
@@ -165,10 +276,12 @@ void setupBeatStuff()
 
   BeatMatcher matcher2 = new BeatMatcher( beats[1].getMaxBeats() );
 
+  matcher2.addBeatEvent( 0, moveRight);
+
   matcher2.addBeatEvent( 0, 
   new IBeatEvent() { 
     public void trigger() { 
-      println("Beat2 MATCHED!");
+      //println("Beat2 MATCHED!");
       IAnimationModifier animod = new TimedAnimationModifier()
       {        
         public void update(int t)
@@ -196,10 +309,20 @@ void setupBeatStuff()
 
   BeatMatcher matcher3 = new BeatMatcher( beats[1].getMaxBeats() );
 
+
+
+  matcher3.addBeatEvent( 2, 
+  new IBeatEvent() { 
+    public void trigger() {
+      currentBGTex = bgImages[int(random(0, bgImages.length))];
+    }
+  }
+  );
+
   matcher3.addBeatEvent( 0, 
   new IBeatEvent() { 
     public void trigger() { 
-      println("Beat2 MATCHED!");
+      //println("Beat2 MATCHED!");
       IAnimationModifier animod = new TimedAnimationModifier()
       {        
         public void update(int t)
@@ -239,17 +362,45 @@ void setupBeatStuff()
     public void trigger() { 
 
       fx = 0.08;
-      fy = 0.6;
-
+      fy = 0.7;
+      /*
       tintColors[0]=color(0, random(100, 255), random(100, 255));
-      tintColors[1]= color(0, random(80, 255), 0);
-      tintColors[2]= color(random(80, 200), 0, 0);
-      tintColors[3]= color(255, 0, 255);
+       tintColors[1]= color(0, random(80, 255), 0);
+       tintColors[2]= color(random(80, 200), 0, 0);
+       tintColors[3]= color(255, 0, 255);
+       */
+    }
+  }
+  );
+
+
+  matcher4.addBeatEvent( 3, 
+  new IBeatEvent() { 
+    public void trigger() { 
+      //println("Beat2 MATCHED!");
+      IAnimationModifier animod = new TimedAnimationModifier()
+      {        
+        public void update(int t)
+        {
+          super.update(t);
+          fy =  0.1f+0.6f*(1f-percentFinished);
+          //println("attract:" + attraction);
+        }
+        public void stop()
+        {
+          fy = 0.5f;
+          fx = 0.2f;
+        }
+      };
+
+      animod.start(beats[1].beatInterval);
+      animModifiers.add( animod );
     }
   }
   );
 
   beats[3].addListener( matcher4 );
+  beats[2].addListener( matcher4 );
   beats[0].addListener( matcher4 );
 
   //initialize beat intervals

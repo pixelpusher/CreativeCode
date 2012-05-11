@@ -1,5 +1,7 @@
 // The Boid class
 
+int boidLifetime = 300;
+
 class Boid {
 
   PVector loc;
@@ -8,7 +10,9 @@ class Boid {
   float r;
   GLTexture tex;
   float maxforce;
-
+  int life;
+  boolean alive;
+  boolean immortal;
 
   Boid(PVector l, float ms, float mf, GLTexture _tex) 
   {
@@ -18,6 +22,10 @@ class Boid {
     r = 2.0 + random(-1, 1);
 
     tex = _tex;
+    life = boidLifetime-int(random(boidLifetime*0.25));
+    alive = true;
+    immortal = false;
+    
   }
 
 

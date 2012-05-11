@@ -55,7 +55,7 @@ public class TimedAnimationModifier implements IAnimationModifier
     {
       currentTime = _currentTime;
       int timeDiff = currentTime-startTime;
-      percentFinished = timeDiff * timelengthInv;
+      percentFinished = constrain(timeDiff * timelengthInv,0f,1f);
     }
   }
   public boolean isFinished() // true if this is done and can be removed
