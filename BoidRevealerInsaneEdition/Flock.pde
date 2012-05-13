@@ -21,6 +21,8 @@ class Flock
   float spawnX, spawnY;
   int toReanimate = 0; 
 
+  int maxToReanimatePerFrame = 2;
+
     Flock() 
   {
     boids = new LinkedList<Boid>(); // Initialize the arraylist
@@ -36,6 +38,8 @@ class Flock
   {
     maxspeed = boidMaxSpeed;
     maxforce = boidMaxForce;
+    
+    int reanimated = 0;
 
     for (Boid b : boids)
     {
@@ -65,8 +69,9 @@ class Flock
           b.render(renderer);
         }
       }
-      else if (toReanimate > 0)
+      else if (toReanimate > 0 && reanimated < maxToReanimatePerFrame)
       {
+        reanimated++;
         toReanimate--;
         b.alive = true;
         b.life = boidLifetime-int(random(boidLifetime*0.25));
