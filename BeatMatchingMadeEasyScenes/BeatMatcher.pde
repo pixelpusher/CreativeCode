@@ -59,7 +59,7 @@ class BeatMatcher implements IBeatListener
   
   public void beatChanged(int beat)  // when a beat changes value, e.g. from 0 to 1
   {
-    BeatEventList ibes = events[beat];
+    BeatEventList ibes = events[beat % events.length];
     ListIterator<IBeatEvent> li = ibes.listIterator();
 
     while ( li.hasNext () )

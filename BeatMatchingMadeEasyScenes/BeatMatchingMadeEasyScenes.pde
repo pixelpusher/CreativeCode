@@ -69,6 +69,7 @@ void setup()
     beats[b].addListener( bl );
   }
 
+
   BeatMatcher matcher = new BeatMatcher( beats[0].getMaxBeats() );
   matcher.addBeatEvent( 3, 
   new IBeatEvent() { 
@@ -83,16 +84,16 @@ void setup()
     public void trigger() 
     { 
       println("start ellipse!");
-      
+
       IAnimationModifier animod = new TimedAnimationModifier()
       {        
         public void update(int t)
         {
           super.update(t);
-          colorMode(HSB, 360,100,100,100);
-          
-          fill (65, 100, map(percentFinished, 0,1,100,0));
-          ellipse(width/8, height/4,width/16,width/16);
+          colorMode(HSB, 360, 100, 100, 100);
+
+          fill (65, 100, map(percentFinished, 0, 1, 100, 0));
+          ellipse(width/8, height/4, width/16, width/16);
         }
         public void stop()
         { 
@@ -107,21 +108,21 @@ void setup()
   );
 
 
-matcher.addBeatEvent( 2, 
+  matcher.addBeatEvent( 2, 
   new IBeatEvent() { 
     public void trigger() 
     { 
       println("start ellipse 2!");
-      
+
       IAnimationModifier animod = new TimedAnimationModifier()
       {        
         public void update(int t)
         {
           super.update(t);
-          colorMode(HSB, 360,100,100,100);
-          
-          fill (303, 100, map(percentFinished, 0,1,100,0));
-          ellipse(2*width/8, height/4,width/16,width/16);
+          colorMode(HSB, 360, 100, 100, 100);
+
+          fill (303, 100, map(percentFinished, 0, 1, 100, 0));
+          ellipse(2*width/8, height/4, width/16, width/16);
         }
         public void stop()
         { 
@@ -138,6 +139,44 @@ matcher.addBeatEvent( 2,
   // add this beat matcher to the list of beat listeners, listening for beat changes
   beats[0].addListener(matcher);
   beats[1].addListener(matcher);
+
+
+
+
+
+  BeatMatcher matcher2 = new BeatMatcher(4);
+  beats[2].addListener(matcher2);
+
+  matcher2.addBeatEvent( 2, 
+  new IBeatEvent() { 
+    public void trigger() 
+    { 
+      println("whirly!");
+
+      IAnimationModifier animod = new TimedAnimationModifier()
+      {        
+        public void update(int t)
+        {
+          super.update(t);
+          translate(width/2,height/2);
+          float angle = (1f-percentFinished) * TWO_PI * sin( (1f-percentFinished)*TWO_PI);
+          rotate(angle);
+          fill(255,60+percentFinished*128);
+          ellipse(height/2*(percentFinished),0, percentFinished*width/2,percentFinished*width/2);
+          ellipse(-height/2*(percentFinished),0, percentFinished*width/2,percentFinished*width/2);
+          translate(-width/2,-height/2);
+        }
+        public void stop()
+        { 
+          println("stop whirly!");
+        }
+      };
+
+      animod.start(beats[currentBeatIndex].beatInterval);
+      animModifiers.add( animod );
+    }
+  }
+  );
 
 
   //initialize beat intervals
@@ -185,15 +224,43 @@ void updateBeatScene()
 
 void draw()
 {
-  
+
   colorMode(RGB);
   fill(0, 20);
   rect(0, 0, width, height);
   fill(255);
   text("Tap spacebar to \nset the tempo", width/2, 40);
 
+
+  fill(255);
+  text("Median time:" + beats[currentBeatIndex].beatInterval, width/2, height-40);
+
+  text("BPM:" + 60000f/beats[currentBeatIndex].beatInterval, width/2, height-20);
+  
   int ms = millis();
 
+
+  // --------------------------------------------
+  // Timed animations ---------------------------
+  // --------------------------------------------
+  //
+  // These are added by BeatListeners when beats are matched
+
+  Iterator<IAnimationModifier> iter = animModifiers.iterator();
+
+  while (iter.hasNext ())
+  {
+    IAnimationModifier animod  = iter.next();
+    if (animod.isFinished())
+    {
+      animod.stop();
+      iter.remove();
+      animod = null;
+    }
+    else animod.update(ms);
+  }  
+
+  //
   // update beat objects in motions
   beats[currentBeatIndex].update(ms);
 
@@ -220,33 +287,6 @@ void draw()
   fill(255, 255, 0, 200);
   text(1+int(beats[2].getPartialBeat()), 0, 0);
   popMatrix();
-
-  fill(255);
-  text("Median time:" + medianTime, width/2, height-40);
-
-  text("BPM:" + 60000/medianTime, width/2, height-20);
-  
-  // --------------------------------------------
-  // Timed animations ---------------------------
-  // --------------------------------------------
-  //
-  // These are added by BeatListeners when beats are matched
-
-  Iterator<IAnimationModifier> iter = animModifiers.iterator();
-
-  while (iter.hasNext ())
-  {
-    IAnimationModifier animod  = iter.next();
-    if (animod.isFinished())
-    {
-      animod.stop();
-      iter.remove();
-      animod = null;
-    }
-    else animod.update(ms);
-  }  
-  
-  
 }
 
 
@@ -273,7 +313,6 @@ void tapTempo()
     for (int b=0; b<beats.length; b++)
       beats[b].setBeatInterval( medianTime );
     println("Median time:" + medianTime);
-
   }
 }
 
