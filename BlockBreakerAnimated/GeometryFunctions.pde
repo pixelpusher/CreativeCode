@@ -6,8 +6,6 @@
 static class Collider
 {
 
-  final static boolean verbose = false;
-  
   // Find the closest point (x,y) to a piece of a line, and return it.
 
   static final Vec2D closestPointToLine(Vec2D l0, Vec2D l1, Vec2D p)
@@ -54,18 +52,22 @@ static class Collider
 
   static void collide(DrawableNode n0, DrawableNode n1)
   {
-
+ 
     n0.accel.set(0, 0);    
     n1.accel.set(0, 0);
 
     // impart some acceleration
     if (n0.movable)
     {
-      n0.accelerate(n1.vel.scale(0.3));
+      n0.accelerate(n1.vel.scale(n1.hardness));
+      // fixme!
+      if (n0 instanceof AnimatedImageNode) ((AnimatedImageNode)n0).start();
     }
     if (n1.movable)
     {
-      n1.accelerate(n0.vel.scale(0.3));
+      n1.accelerate(n0.vel.scale(n0.hardness));
+      // fixme!
+      if (n1 instanceof AnimatedImageNode) ((AnimatedImageNode)n0).start();
     }
 
 
