@@ -28,6 +28,9 @@ class DrawableNode
   Vec2D vel;        // velocity
   Vec2D accel;      // acceleration
 
+  float rotation;  // z rotation, clockwise in radians
+  float rotationSpeed;  // z rotation speed per frame, clockwise in radians
+
   // drawing variables
   boolean hasStroke = false;
   color strokeColor = color(0);
@@ -54,6 +57,8 @@ class DrawableNode
     vel = new Vec2D();
     accel = new Vec2D();
 
+    rotationSpeed = 0f;
+
     data = new HashMap<String, Object>();
 
     updateBoundingBox();
@@ -68,6 +73,8 @@ class DrawableNode
     vel = new Vec2D();
     accel = new Vec2D();
 
+    rotationSpeed = 0f;
+
     data = new HashMap<String, Object>();
 
     w = _w;
@@ -79,6 +86,7 @@ class DrawableNode
 
   void setX(float _x)
   {
+    prevPos.x = _x;
     pos.x = _x;
     minX = pos.x;
     maxX = pos.x + w;
@@ -86,6 +94,7 @@ class DrawableNode
 
   void setY(float _y)
   {
+    prevPos.y = _y;
     pos.y = _y;
     minY = pos.y;
     maxY = pos.y + h;
@@ -169,6 +178,14 @@ class DrawableNode
         finishedMoving();
       }
 
+      if (abs(rotationSpeed) > PI/60f)
+      {
+         rotation += rotationSpeed;
+         rotationSpeed *= frictionCoeff;
+      }
+      else
+        rotationSpeed = 0f;
+
       if (wrap)
       {
         if (pos.x < 0) setX(width-w-1);
@@ -185,17 +202,16 @@ class DrawableNode
 
   void moveTo(float x, float y)
   {
-    pos.set(x, y);
     prevPos.set(pos);
-    updateBoundingBox();
+    setX(x);
+    setY(y);
   }
 
 
   void move(float x, float y)
   {
-    pos.addSelf(x, y);
     prevPos.set(pos);
-
+    pos.addSelf(x, y);
     updateBoundingBox();
   }
 
@@ -225,12 +241,23 @@ class DrawableNode
     }
 
     // you can change this in subclasses to make custom objects
-    
-    renderer.rectMode(CORNERS);
-    renderer.rect(minX, minY, maxX, maxY);
+
+    //rectMode(CORNER);
+    //rect(pos.x, pos.y, w,h);
+    if (rotationSpeed == 0f)
+    {
+      renderer.rectMode(CORNERS);
+      renderer.rect(minX, minY, maxX, maxY);
+    }
+    else
+    {
+      Vec2D m = middle();
+      renderer.translate(m.x, m.y);
+      renderer.rectMode(CENTER);
+      renderer.rotate(rotation);
+      renderer.rect(0, 0, w, h);
+    }
   }
-
-
 
 
   // simple rectangluar boundary hit test

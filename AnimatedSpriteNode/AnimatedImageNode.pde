@@ -150,9 +150,9 @@ class AnimatedImageNode extends DrawableNode
   {
     int currentCol = spriteIndex % cols;
     int currentRow = spriteIndex/cols;
-    
+
     imgX = currentCol*imgW; 
-      //println("x=" +imgX);
+    //println("x=" +imgX);
     imgY = currentRow*imgH;
   }
 
@@ -248,6 +248,20 @@ class AnimatedImageNode extends DrawableNode
       renderer.noStroke();
     }
 
+    renderer.pushMatrix();
+    //rectMode(CORNER);
+    //rect(pos.x, pos.y, w,h);
+    if (rotationSpeed == 0f)
+    {
+      renderer.translate(pos.x, pos.y);
+    }
+    else
+    {
+      Vec2D m = middle();
+      renderer.translate(m.x, m.y);
+      renderer.rotate(rotation);
+      renderer.translate(-w/2, -h/2);
+    }
 
     //imgX, imgY, imgW, imgH
 
@@ -257,13 +271,25 @@ class AnimatedImageNode extends DrawableNode
     renderer.textureMode(IMAGE);
     renderer.beginShape();
     renderer.texture( img );
-    renderer.vertex(pos.x, pos.y, imgX, imgY);
+
+    float tx0=imgX;
+    float tx1=imgX+imgW-1;
+
+    if (flipped)
+    {
+      tx0 += imgW-1;
+      tx1 = imgX;
+    }
     
+    renderer.vertex(0, 0, tx0, imgY);
     // subtract 1px from width because of Processing bug?
-    renderer.vertex(pos.x+w, pos.y, imgX+imgW-1, imgY);
-    renderer.vertex(pos.x+w, pos.y+h, imgX+imgW-1, imgY+imgH);
-    renderer.vertex(pos.x, pos.y+h, imgX, imgY+imgH);
+    renderer.vertex(w, 0, tx1, imgY);
+    renderer.vertex(w, h, tx1, imgY+imgH);
+    renderer.vertex(0, h, tx0, imgY+imgH);
+
     renderer.endShape();
+
+    renderer.popMatrix();
   }
 
 
@@ -271,6 +297,7 @@ class AnimatedImageNode extends DrawableNode
   {
     img = null;
     currentSprite = null;
+    super.unload();
   }
 
   // end class

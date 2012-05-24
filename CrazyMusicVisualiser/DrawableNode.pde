@@ -5,7 +5,7 @@ class DrawableNode
   // a very small numnber
   final float epsilon = 1E-4;
   float minVelocity = 0.2f;
-  
+
   // has this been hit?
 
   boolean hasCollided = false;
@@ -28,6 +28,9 @@ class DrawableNode
   Vec2D vel;        // velocity
   Vec2D accel;      // acceleration
 
+  float rotation;  // z rotation, clockwise in radians
+  float rotationSpeed;  // z rotation speed per frame, clockwise in radians
+
   // drawing variables
   boolean hasStroke = false;
   color strokeColor = color(0);
@@ -37,7 +40,7 @@ class DrawableNode
   boolean wrap;
 
   HashMap<String, Object> data = null;  // in case you need some custom data storage...
-  
+
 
   /// Constructor //////////////////////////////////////
   //////////////////////////////////////////////////////
@@ -54,6 +57,8 @@ class DrawableNode
     vel = new Vec2D();
     accel = new Vec2D();
 
+    rotationSpeed = 0f;
+
     data = new HashMap<String, Object>();
 
     updateBoundingBox();
@@ -67,6 +72,8 @@ class DrawableNode
 
     vel = new Vec2D();
     accel = new Vec2D();
+
+    rotationSpeed = 0f;
 
     data = new HashMap<String, Object>();
 
@@ -146,6 +153,14 @@ class DrawableNode
 
   void update()
   {
+
+    if (abs(rotationSpeed) > EPSILON)
+    {
+      rotation += rotationSpeed;
+    }
+    else
+      rotationSpeed = 0f;
+
     if (moving)
     {
       // apply acceleration
@@ -225,9 +240,22 @@ class DrawableNode
     }
 
     // you can change this in subclasses to make custom objects
-    
-    renderer.rectMode(CORNERS);
-    renderer.rect(minX, minY, maxX, maxY);
+
+    //rectMode(CORNER);
+    //rect(pos.x, pos.y, w,h);
+    if (rotationSpeed == 0f)
+    {
+      renderer.rectMode(CORNERS);
+      renderer.rect(minX, minY, maxX, maxY);
+    }
+    else
+    {
+      Vec2D m = middle();
+      renderer.translate(m.x, m.y);
+      renderer.rectMode(CENTER);
+      renderer.rotate(rotation);
+      renderer.rect(0, 0, w, h);
+    }
   }
 
 
@@ -255,7 +283,7 @@ class DrawableNode
     return true;
   }
 
-  
+
   void unload()
   {
     data.clear();

@@ -63,6 +63,8 @@ class DrawableNode
     vel = new Vec2D();
     accel = new Vec2D();
 
+    rotationSpeed = 0f;
+
     w = _w;
     h = _h;
 
@@ -140,7 +142,12 @@ class DrawableNode
   void update()
   {
 
-    rotation += rotationSpeed;
+    if (abs(rotationSpeed) > EPSILON)
+    {
+      rotation += rotationSpeed;
+    }
+    else
+      rotationSpeed = 0f;
 
     if (moving)
     {
@@ -183,10 +190,19 @@ class DrawableNode
   void moveTo(float x, float y)
   {
     prevPos.set(pos);
-    pos.set(x, y);
-
-    // update minX, maxX, etc
+    setX(x);
+    setY(y);
   }
+
+
+
+  void move(float x, float y)
+  {
+    prevPos.set(pos);
+    pos.addSelf(x, y);
+    updateBoundingBox();
+  }
+
 
   /// draw /////////////////////////////////////////////
   //////////////////////////////////////////////////////
@@ -231,8 +247,6 @@ class DrawableNode
   }
 
 
-
-
   // simple rectangluar boundary hit test
   boolean intersects(DrawableNode other)
   {
@@ -247,8 +261,18 @@ class DrawableNode
   }
 
 
+  boolean pointInside(float x, float y)
+  {
+    if (x < minX || x > maxX) return false;
+    if (y < minY || y > maxY) return false;
+
+    return true;
+  }
+
+
   void unload()
   {
+    data.clear();
   }
 
   void finishedMoving()

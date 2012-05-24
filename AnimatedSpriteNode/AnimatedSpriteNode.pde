@@ -65,6 +65,7 @@ void draw()
     // if we hit the sprite with the mouse, knock it around and start animating
     if (sprites[i].pointInside(mouseX, mouseY))
     {
+      sprites[i].rotationSpeed = PI/10f;
       sprites[i].accelerate((new Vec2D(mouseX-pmouseX, mouseY-pmouseY)).limit(speedLimit));
       sprites[i].start(); // start animating
     }
