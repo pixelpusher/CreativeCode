@@ -17,11 +17,18 @@
 #include "Sounds.h"
 #include <JeeLib.h>
 
-const int ListenBaseTimeOut = 4000;
+const int ListenBaseTimeOut = 2000;
 
 #define AMP_PWR_PIN A3 // using the Mono Amp breakout board from Sparkfun which has on/off capability: https://www.sparkfun.com/products/11044
 //#define DEBUG 1
 
+#ifdef DEBUG
+const int RandomTime = 1;
+#else
+const int RandomTime = 250;
+#endif
+
+const int SleepFactor = 2; // proportion of time to sleep for vs. listening (2 = double listen time)
 const int speakerPin = 3;
 
 char payload[] = "tweet"; // what we broadcast
@@ -37,7 +44,7 @@ ISR(WDT_vect) {
   Sleepy::watchdogEvent(); 
 }
 
-int ListenTimeOut = 5000;
+int ListenTimeOut = 2000; // will change
 int listenStartTime = 0;
 
 volatile boolean finishedSquawking = false;
@@ -121,10 +128,16 @@ void loop()
       delay(60); 
     }
     
+    rf12_sleep (1000); // in 32 * ms, so 32 seconds in this case
+    Sleepy::loseSomeTime((ListenBaseTimeOut + random (1, 9) * RandomTime)*SleepFactor);
+    delay(10); // settle
+    rf12_sleep (-1); // wake up radio
+    delay(10); // settle
+    
     mode = LISTEN; // listen for other birds
     listenStartTime = millis();
     //ListenTimeOut = ListenBaseTimeOut + random (1, 9) * 250; 
-    ListenTimeOut = ListenBaseTimeOut + random (1, 9) * 1; 
+    ListenTimeOut = ListenBaseTimeOut + random (1, 9) * RandomTime; 
 
   }  
   else 
