@@ -1,4 +1,4 @@
- /*                 JeeNode / JeeNode USB / JeeSMD 
+/*                 JeeNode / JeeNode USB / JeeSMD 
  -------|-----------------------|----|-----------------------|----       
  |       |D3  A1 [Port2]  D5     |    |D3  A1 [port1]  D4     |    |
  |-------|IRQ AIO +3V GND DIO PWR|    |IRQ AIO +3V GND DIO PWR|    |
@@ -12,14 +12,15 @@
  |       |    D6 [Port3]  A2  D3 |    |    D7 [Port4]  A3  D3 |    |
  -------|-----------------------|----|-----------------------|----
  */
- 
+
 
 #include "Sounds.h"
 #include <JeeLib.h>
 
-const int ListenBaseTimeOut = 1;
- 
+const int ListenBaseTimeOut = 4000;
+
 #define AMP_PWR_PIN A3 // using the Mono Amp breakout board from Sparkfun which has on/off capability: https://www.sparkfun.com/products/11044
+//#define DEBUG 1
 
 const int speakerPin = 3;
 
@@ -32,16 +33,18 @@ int payloadLength = PayloadLength; // length of above message
 byte needToSend;
 
 // boilerplate for low-power waiting
-ISR(WDT_vect) { Sleepy::watchdogEvent(); }
+ISR(WDT_vect) { 
+  Sleepy::watchdogEvent(); 
+}
 
 int ListenTimeOut = 5000;
 int listenStartTime = 0;
 
 volatile boolean finishedSquawking = false;
 
-enum Mode { SQUAWK, SHUT_UP, LISTEN };
+enum Mode { SQUAWK, SHUT_UP, LISTEN };  // all possible modes
 
-Mode mode = SHUT_UP;
+Mode mode = SHUT_UP;  // current operating mode (for AI) 
 
 
 //--------------------------- 
@@ -50,6 +53,10 @@ Mode mode = SHUT_UP;
 
 void setup () 
 {  
+#ifdef DEBUG
+  Serial.begin(57600);
+  Serial.println("STARTING");
+#endif
 
   pinMode (A0, INPUT);
   randomSeed (analogRead (A0) );
@@ -57,76 +64,136 @@ void setup ()
   pinMode (AMP_PWR_PIN, OUTPUT);  // amp on/off pin
   digitalWrite (AMP_PWR_PIN, LOW); // turn off amp
   rf12_initialize(1, RF12_868MHZ, 33); // initialise wireless broadcaster?
-  
-  startSquawking();
 
+  startSquawking();
 }
+
+
 
 void startSquawking()
 {
+#ifdef DEBUG
+      Serial.print("SQUAWKING ");
+      Serial.println(millis());
+#endif      
 
   mode = SQUAWK;
   startPlayback(sample, sizeof(sample));
-  rf12_sleep (1000);
-
+  rf12_sleep (1000); // in 32 * ms, so 32 seconds in this case 
 }
-  
 
-void loop() { 
 
-  if (finishedSquawking) {
+void loop() 
+{ 
+  boolean doneReceiving = false;
 
+  if (finishedSquawking) 
+  {
     finishedSquawking = false;
 
     mode = SHUT_UP;
     digitalWrite(speakerPin, LOW);
     digitalWrite(AMP_PWR_PIN, LOW);
-    rf12_sleep (-1);
-
+    rf12_sleep (-1); // wake up radio
+    delay(20);
     // we're playing a sound - broadcast call
-    if (rf12_canSend()) rf12_sendStart(0, payload, sizeof (payload));
 
+    int cnt = 0;
+    boolean cleared = false;
+
+    rf12_recvDone(); // must call this to clear the buffer otherwise can't send!
+
+    while (cnt < 5000 && !cleared)
+    {
+      delay(1);
+      ++cnt;
+      cleared = rf12_canSend();
+    } 
+
+    if (cleared) 
+    {
+#ifdef DEBUG
+      Serial.print("SENDING ");
+      Serial.println(millis());
+#endif      
+
+      rf12_sendStart(0, payload, sizeof (payload));
+      delay(60); 
+    }
+    
     mode = LISTEN; // listen for other birds
     listenStartTime = millis();
+    //ListenTimeOut = ListenBaseTimeOut + random (1, 9) * 250; 
     ListenTimeOut = ListenBaseTimeOut + random (1, 9) * 1; 
-    
+
   }  
+  else 
+  {
+    doneReceiving = rf12_recvDone();
 
-  boolean doneReceiving = false;
-  switch (mode) {
+    switch (mode) 
+    {
 
-    case LISTEN: {
-      doneReceiving = rf12_recvDone();
-      int timeDiff = millis() - listenStartTime;
-      // has time run out?
-      if ( timeDiff > ListenTimeOut ) 
-        startSquawking(); // start squawking again
-      else if (doneReceiving && (rf12_crc == 0) && matchPayload () ) {
-        if (finishedSquawking == true) startSquawking(); // discovered a bird, squawk again
+      case LISTEN: 
+      {
+          /* DEBUG */
+#ifdef DEBUG
+          if (doneReceiving) Serial.println("DONE RECEIVING");
+#endif      
+  
+          int timeDiff = millis() - listenStartTime;
+          // has time run out?
+          if ( timeDiff > ListenTimeOut ) 
+            startSquawking(); // start squawking again
+          else if (doneReceiving && (rf12_crc == 0) && matchPayload () ) {
+            startSquawking(); // discovered a bird, squawk again
+          }
+          break;
       }
-      break;
+      
+      
+    // end switch(mode)  
     }
-
+  // end else  
   }
   
+// end main loop
 } 
 
 
 boolean matchPayload()
 {
-  
+
   // check message length to see if it is the same as the payload we're looking for
-  if ( rf12_len != sizeof payload) return false;
-    
+  if ( rf12_len != sizeof payload) 
+  {
+#ifdef DEBUG
+    memcpy(&inPayload, (byte*) rf12_data, sizeof inPayload);
+    // test each character in the message for a match  
+    Serial.print("PAYLOAD:");    
+    for (byte i = 0; i < PayloadLength; ++i)
+      Serial.print(inPayload[i]);
+    Serial.println();    
+#endif    
+    return false;
+  }
+
   memcpy(&inPayload, (byte*) rf12_data, sizeof inPayload);
-  
+#ifdef DEBUG
+  Serial.println("matching");
+#endif
+
   // test each character in the message for a match  
   for (byte i = 0; i < PayloadLength; ++i)
     if (payload[i] != char(inPayload[i]))
-       return false;
- 
+      return false;
+
+#ifdef DEBUG
+  Serial.println("matched");
+#endif
   // otherwise, matched it 
   return true;
-  
+
 }
+
 
