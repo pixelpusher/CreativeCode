@@ -12,6 +12,8 @@ int shapeIndex = 0;
 
 void keyReleased()
 {
+  if (key ==' ') tapTempo();
+  else
   if (key == 's' || key =='S' && currentShape != null)
   {
     currentShape.syncVertsToSource();
@@ -161,7 +163,7 @@ void keyReleased()
     currentShape.removeVert(currentVert);
     currentVert = null;
   }
-  else if (key == ' ') 
+  else if (key == 'v') 
   {
     currentShape.clearVerts();
     currentVert = null;

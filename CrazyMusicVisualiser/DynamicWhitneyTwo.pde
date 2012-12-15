@@ -14,7 +14,7 @@ public class DynamicWhitneyTwo extends DynamicGraphic
   float cx, cy;
   float crad;
   float cycleLength;
-  float startTime;
+  float startTime, changeTime;
   int   counter;
   int numPetals;
   float speed;
@@ -35,6 +35,7 @@ public class DynamicWhitneyTwo extends DynamicGraphic
 
   void initialize()
   {     
+    changeTime = 4000;
     numPetals = 4;
     usePoints = true;
     nbrPoints = 80;
@@ -75,8 +76,16 @@ public class DynamicWhitneyTwo extends DynamicGraphic
     this.strokeWeight(4);
 
     //startTime = -(cycleLength*20) / (float) this.height;
-    float timer = (millis() - startTime) % cycleLength;
-
+    float timeDiff = (millis() - startTime);
+    float timer = timeDiff % cycleLength;
+   /*
+    if (timeDiff > changeTime) 
+    {
+      changeTime = millis()+4000;
+      numPetals = max(2, ++numPetals % 6);
+      usePoints = (random(0,1) > 0.499);
+    }
+   */
     //this.background(0);
     
     //counter = int(timer / cycleLength);

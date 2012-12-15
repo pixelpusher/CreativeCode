@@ -158,6 +158,7 @@ public class PsychedelicWhitney extends DynamicGraphic
 
     gll.glClearColor(0f, 0f, 0f, 0f);
     gll.glClear(GL.GL_COLOR_BUFFER_BIT);
+
     gll.glDisable( GL.GL_DEPTH_TEST );
     gll.glEnable( GL.GL_BLEND );
     gll.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);

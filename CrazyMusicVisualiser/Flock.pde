@@ -19,7 +19,7 @@ class Flock
   float maxspeed;    // Maximum speed
 
 
-    Flock() 
+  Flock() 
   {
     boids = new LinkedList<Boid>(); // Initialize the arraylist
     active = false;

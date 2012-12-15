@@ -44,8 +44,7 @@ public class DynamicWhitney extends DynamicGraphic
     cy = this.height/2;
     crad = (min(this.width, this.height)/2) * 0.95;
     cycleLength = 320000*4;
-    speed = (TWO_PI*nbrPoints) / cycleLength;
-    baseSpeed = (TWO_PI*nbrPoints) / cycleLength;
+    calcSpeed();
     startTime = millis();
 
     this.beginDraw();      
@@ -56,6 +55,12 @@ public class DynamicWhitney extends DynamicGraphic
     this.endDraw();
   }
 
+
+  void calcSpeed()
+  {
+    speed = (TWO_PI*nbrPoints) / cycleLength;
+    baseSpeed = (TWO_PI*nbrPoints) / cycleLength;
+  }
 
   //
   // do the actual drawing (off-screen)

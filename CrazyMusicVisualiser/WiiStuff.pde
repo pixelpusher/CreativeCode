@@ -19,19 +19,6 @@ WiiChuck chuck1;
 
 void randomiseShapeColors()
 {
-
-  /*
-  Set<Map.Entry<String, DynamicGraphic>> dyngraphs = dynamicGraphics.entrySet();
-   Iterator<Map.Entry<String, DynamicGraphic>> dgsIterator = dyngraphs.iterator();
-   
-   while (dgsIterator.hasNext())
-   {
-   Map.Entry<String, DynamicGraphic> dg = dgsIterator.next();
-   String type = dg.getKey();
-   DynamicGraphic dyngraphic =  dg.getValue();  
-   }
-   */
-
   try {
 
     if ( shapes != null)
@@ -45,15 +32,29 @@ void randomiseShapeColors()
         ps.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
         //    currentShape.srcColor = color(255,255);
         ps.dstColor = ps.srcColor;
-        float chance = random(0, 1);
-        if (chance < 0.2)
-          ps.blendMode = BLEND;
-        else if (chance < 0.5)
-          ps.blendMode = ADD;    
-        else if (chance < 0.7)
-          ps.blendMode = MULTIPLY;    
-        else
-          ps.blendMode = LIGHTEST;
+      }
+    }
+  }
+  catch (Exception e)
+  {
+    e.printStackTrace();
+  }
+}
+
+
+
+void setShapeBlends(int bm)
+{
+  try 
+  {
+    if ( shapes != null)
+    {
+      Iterator<ProjectedShape> iter = shapes.iterator();
+
+      while (iter.hasNext ())
+      {
+        ProjectedShape ps = iter.next();        
+        ps.blendMode = bm;
       }
     }
   }

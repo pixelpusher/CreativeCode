@@ -16,9 +16,10 @@
 //import javax.media.opengl.GL2;
 
 
+final int BlendModes[] = {DIFFERENCE,LIGHTEST,MULTIPLY,ADD,BLEND};
+  
 class ProjectedShapeRenderer
 {
-
   float cr=0f, cg=0f, cb=0f, ca=1f; // clear colour
   
   //PGraphics renderer = null;   // rendering target object

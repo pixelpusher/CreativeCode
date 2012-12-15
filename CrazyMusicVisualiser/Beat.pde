@@ -21,12 +21,14 @@ class Beat
   private ArrayList<IBeatListener> listeners;
 
   private boolean reset;
+  private boolean changedBeat;
 
   Beat()
   {
     _lastTime = millis();
     listeners = new ArrayList<IBeatListener>();
     reset = true;
+    changedBeat = false;
   }
 
   Beat(int mb)
@@ -35,6 +37,7 @@ class Beat
     listeners = new ArrayList<IBeatListener>(); 
     _lastTime =  millis();
     reset = true;
+    changedBeat = false;
   } 
 
   int getMaxBeats()
@@ -56,6 +59,11 @@ class Beat
   float getPartialBeat()
   {
     return partialBeat;
+  }
+
+  boolean getBeatChanged()
+  {
+    return changedBeat;
   }
 
 
@@ -85,6 +93,7 @@ class Beat
     _currentBeat  = lastBeat = 0;
     _lastTime = startTimeMillis;
     reset = true;
+    changedBeat = false;
   }
 
   void reset()
@@ -124,6 +133,8 @@ class Beat
 
   float update(int currentTimeMillis)
   {
+    changedBeat = false;
+    
     // get beat interval
     int _interval = (currentTimeMillis - _lastTime);
 
@@ -160,13 +171,12 @@ class Beat
     if (lastBeat != _currentBeat)
     {
       //println("beat:"+_currentBeat+"/"+lastBeat);
-      
+      changedBeat = true;
       lastBeat = _currentBeat;
       
       for (IBeatListener ibl : listeners)
         ibl.beatChanged( _currentBeat );
     }      
-    
     
     return _currentBeat;
   }

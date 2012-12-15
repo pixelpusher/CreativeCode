@@ -40,6 +40,7 @@ import processing.opengl.*;
 import javax.media.opengl.*;
 import codeanticode.glgraphics.*;
 
+LinkedList<IAnimationModifier> cameraAnimations;
 
 LinkedList<ProjectedShape> shapes = null; // list of points in the image (PVectors)
 
@@ -132,6 +133,8 @@ void setup()
   // set up controlP5 gui
   initGUI();
 
+  cameraAnimations = new LinkedList<IAnimationModifier>();
+
   {
     PGraphicsOpenGL pgl = (PGraphicsOpenGL) g;  // g may change
     GL gl = pgl.beginGL();  // always use the GL object returned by beginGL
@@ -201,6 +204,7 @@ void setup()
   // setup wii interface
   setupWiiChuck();
 
+  setupBR();
 
   loadedImagesNodes = new ArrayList<DrawableNode>();
 
@@ -342,9 +346,11 @@ PImage loadImageIfNecessary(String location)
 //
 
 void draw()
-{
+{  
+  
   // beats
-  updateBeatStuff();
+      updateBeatStuff();
+  background(0);
   
   // for rendering
   //  incTime();
@@ -400,8 +406,8 @@ void draw()
   }
   else
   {
-    shapeRenderer.beginRender(mappedView);
-
+    shapeRenderer.beginRender(mappedView, true);
+  
     for (ProjectedShape projShape : shapes)
     {
       //if ( projShape != currentShape)
@@ -450,19 +456,43 @@ void draw()
     // now draw for reals
     else
     {
+
+ 
+      drawBR(mappedView);
       doGLGlow(mappedView);
 
+      
       PImage mappedImage = (PImage)destTex;
       // not mappedView.getTexture()
 
-      image(mappedImage, 0, 0, width, height);
+
+    int ms = millis();
+    pushMatrix();
+    Iterator<IAnimationModifier> iter = cameraAnimations.iterator();
+    
+    while (iter.hasNext ())
+    {
+      IAnimationModifier animod  = iter.next();
+      if (animod.isFinished())
+      {
+        animod.stop();
+        iter.remove();
+        animod = null;
+      }
+      else animod.update(ms);
     }
+    
+   image(mappedImage, 0, 0, width, height);  
+   popMatrix();
+  }
+
 
     noStroke();
 
     // BLEND MODE LEAKS!
     // That's why this is necessary
     shapeRenderer.screenBlend(BLEND, (PGraphicsOpenGL)(this.g));
+    
     if (showFPS)
     {
       //      fill(255);
@@ -484,6 +514,8 @@ void draw()
     }
   }
   // end draw
+
+  
 
   if (rendering)
     saveFrame("frames/frame-"+ nf(renderedFrames, 6)+ ".png");
@@ -703,6 +735,7 @@ void mouseDragged()
 void movieEvent(Movie movie) {
   movie.read();
 }
+
 
 /*
 // for rendering... to replace millis() with a standard time per frame
