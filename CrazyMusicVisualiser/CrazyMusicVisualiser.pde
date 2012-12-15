@@ -6,26 +6,29 @@
  *
  * by Evan Raskob
  * 
- * keys:
- *
+ *  ALT+h toggles turning the GUI on/off (for loading files and movies)
  *  a: add a new shape
  *  x: delete current shape
+ *  ;: change shape's texture (image) to next one in list
  *  <: prev shape
  *  >: next shape
  *  d: delete currently selected shape vertex
  *  s: sync vertices to source for current shape
  *  t: sync vertices to destination for current shape
+ *  l: duplicate the selected shape
  *  SPACEBAR: clear current shape
  *  i: add 4 vertices around perimeter of shape
  *  I: same as 'i' but scale to mapped view 
  *  [: hide mouse
  *  ]: show mouse
+ *  .: toggle FPS display on/off
+ *  /: pause rendering
  *  m: next display mode ( SHOW_SOURCE, SHOW_MAPPED, SHOW_BOTH)
  *
  *  `: save XML config to file (data/config.xml)
  *  !: read XML config from file (data/config.xml)
- *  ~: change default file name
- *
+ *  ~: save new XML config file (using file chooser)
+ *  @: load config file (using file chooser)
  *
  
  * TODO: reordering of shape layers
@@ -39,6 +42,16 @@ import controlP5.*;
 import processing.opengl.*;
 import javax.media.opengl.*;
 import codeanticode.glgraphics.*;
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+
+
+
+Minim minim;
+AudioInput in;
+FFT fft;
+
+final int BUFFER_SIZE = 512;
 
 LinkedList<IAnimationModifier> cameraAnimations;
 
@@ -123,7 +136,11 @@ void setup()
   size(1024, 768, GLConstants.GLGRAPHICS);
   frameRate(60);
   noCursor();
-
+  
+  minim = new Minim(this);
+  // get a line in from Minim, default bit depth is 16
+  in = minim.getLineIn(Minim.MONO, BUFFER_SIZE);
+  
   //  frame.setUndecorated(true);
 
   //frame.setLocation(0,0);

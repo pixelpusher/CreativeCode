@@ -2,6 +2,7 @@
 // This draws a "Whitney" image
 //------------------------------------------------------------------
 
+
 public class DynamicWhitneyTwo extends DynamicGraphic
 {
   // Based in part on WhitneyScope by Jim Bumgardner
@@ -19,8 +20,9 @@ public class DynamicWhitneyTwo extends DynamicGraphic
   int numPetals;
   float speed;
   boolean usePoints;
-
-
+  // number of points to draw per ring
+  
+  
   DynamicWhitneyTwo(PApplet app, int iwidth, int iheight)
   {
     super( app, iwidth, iheight);

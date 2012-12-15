@@ -187,6 +187,33 @@ void keyReleased()
   {
     noCursor();
   }
+  else if (key == ';')
+  {
+    Iterator<String> imgNamesIter = sourceImages.keySet().iterator();
+    boolean looping = true;
+
+    while (looping && imgNamesIter.hasNext ())
+    {
+      String imgName = imgNamesIter.next();
+      PImage img = sourceImages.get(imgName);
+      if (currentShape.srcImage == img)
+      {
+        //println("found it!");
+        if (imgNamesIter.hasNext())
+        {
+          String nextImg = imgNamesIter.next();
+          println("next image:" + nextImg);
+          currentShape.srcImage = sourceImages.get( nextImg  );
+        }
+        else
+        {
+          // use first
+          currentShape.srcImage = sourceImages.get( sourceImages.keySet().iterator().next() );
+        }
+        looping = false;
+      }
+    }
+  }
   else if (key == '`')
   {
     createConfigXML();
