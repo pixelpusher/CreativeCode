@@ -179,3 +179,27 @@ boolean isInsideShape(ProjectedShape projShape, float x, float y, boolean testSo
   else return true;
 }
 
+
+
+// rotate Vector 2D around a point
+// angle in radians
+//
+void rotateVector2D(PVector v, float anchorX, float anchorY, float angle) 
+{
+    float rotX, rotY, origX, origY;
+ 
+    origX = rotX = v.x - anchorX;  // subtract to get relative position
+    origY = rotY = v.y - anchorY;  // or with other words, to get origin (anchor/rotation) point to 0,0
+    //this is what I didn't understand althought I had calculus to rotate (that was only what I had)
+ 
+    v.x -= rotX;
+    v.y -= rotY;
+ 
+    rotX = origX * cos(angle) - origY * sin(angle);
+    rotY = origX * sin(angle) + origY * cos(angle);
+ 
+    v.x += rotX; // get it back to absolute position on screen
+    v.y += rotY;
+  }
+
+

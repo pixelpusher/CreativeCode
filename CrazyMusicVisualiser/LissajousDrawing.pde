@@ -52,13 +52,13 @@ public class LissajousDrawing extends DynamicGraphic
   //
   void pre()
   {
-    this.beginDraw();
 
+/*
     GL gl = this.beginGL();
     gl.glClearColor(0f, 0f, 0f, 0f);
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     this.endGL();
-
+*/
 
     //this.smooth();
     this.colorMode(HSB, 1);
@@ -183,7 +183,6 @@ public class LissajousDrawing extends DynamicGraphic
       }
     }
 
-    this.endDraw();
   }
   // end class LissajousDrawing
 }

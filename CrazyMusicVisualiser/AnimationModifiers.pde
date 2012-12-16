@@ -14,7 +14,7 @@ class FadeWhitneyOnBeat implements IAnimationModifier
     int r = (ps.dstColor >> 16) & 0xFF;
     int g = (ps.dstColor >> 8) & 0xFF;
     int b = ps.dstColor & 0xFF;
-    ps.dstColor = 0xE0000000 | (r << 16) | (g << 8) | b;
+    ps.dstColor = 0x85000000 | (r << 16) | (g << 8) | b;
     ps = null;
   }
   public void pause() {
@@ -27,7 +27,7 @@ class FadeWhitneyOnBeat implements IAnimationModifier
   public void update(int t) 
   {
     float beat = beats[currentBeatIndex].getPartialBeat() % 1f; // 1/4
-    int balpha = int(beat*180) <<  24;
+    int balpha = int(beat*120) <<  24;
 
     int r = (ps.dstColor >> 16) & 0xFF;
     int g = (ps.dstColor >> 8) & 0xFF;
@@ -67,7 +67,7 @@ class FadeGlowOnBeat implements IAnimationModifier
   }
 
   public void stop() {
-    fy = 0.8;
+    fy = 0.85;
   }
   public void pause() {
   }
@@ -77,7 +77,7 @@ class FadeGlowOnBeat implements IAnimationModifier
   {
     float beat = beats[currentBeatIndex].getPartialBeat() % 1f; // 1/4
 
-    fy = beat;
+    fy = beat*beat*0.9f;
     
     if (beats[currentBeatIndex].getBeatChanged()) 
     {

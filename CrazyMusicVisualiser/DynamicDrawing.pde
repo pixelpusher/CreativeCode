@@ -14,6 +14,7 @@ void setupDynamicImages()
   DynamicGraphic whitneyDynamicImage = new DynamicWhitney(this, 1024, 1024);
   DynamicGraphic whitneyDynamicImage2 = new DynamicWhitneyTwo(this, 1024, 1024);
   DynamicGraphic whitneyDynamicImage3 = new PsychedelicWhitney(this, 1024, 1024);
+  DynamicGraphic lissDynamicImage = new LissajousDrawing(this, 512, 512);
 }
 
 

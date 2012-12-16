@@ -38,6 +38,7 @@
 
 
 import processing.video.*;
+import codeanticode.gsvideo.*;
 import controlP5.*;
 import processing.opengl.*;
 import javax.media.opengl.*;
@@ -66,11 +67,11 @@ float maxDistToVert = 10;  //max distance between mouse and a vertex for moving
 ProjectedShape currentShape = null;
 
 HashMap<String, PImage> sourceImages;  // list of images, keyed by file name
-HashMap<ProjectedShape, Movie> sourceMovies;  // list of movies, keyed by associated object that is using them
+HashMap<String, GSMovie> sourceMovies;  // list of movies, keyed by associated object that is using them
 HashMap<String, DynamicGraphic> sourceDynamic;  // list of dynamic images (subclass of PGraphics), keyed by name
 
 HashMap<PImage, String> imageFiles;
-HashMap<Movie, String> movieFiles;
+HashMap<GSMovie, String> movieFiles;
 
 PImage blankImage;  // default image for shapes
 
@@ -87,7 +88,10 @@ boolean hitDestShape = false;
 boolean showFPS = false;
 boolean deleteShape = false;
 
-boolean rendering = false;
+boolean rendering = false;  // for writing to disk
+
+boolean sequencing = true; // beat sequencer toggle
+
 
 int displayMode = SHOW_MAPPED;  
 
@@ -206,7 +210,7 @@ void setup()
   sourceDynamic = new HashMap<String, DynamicGraphic>();
 
   imageFiles = new HashMap<PImage, String>();
-  movieFiles = new HashMap<Movie, String>();
+  movieFiles = new HashMap<GSMovie, String>();
 
   // load my image as a test
   // PImage sourceImage = loadImageIfNecessary("7sac9xt9.bmp");
@@ -248,7 +252,7 @@ void resetAllData()
 
   // TODO: better way to unload these?
   sourceImages = new HashMap<String, PImage>(); 
-  sourceMovies = new HashMap<ProjectedShape, Movie>();
+  sourceMovies = new HashMap<String, GSMovie>();
 
   // probably don't want to reset dynamic images because there is no way to recreate them!
   //sourceDynamic = new HashMap<String, PGraphics>();
@@ -265,7 +269,7 @@ void resetAllData()
 
 ProjectedShape addNewShape(PImage sourceImage)
 {
-  println("ADDING SHAPE " + sourceImage);
+//  println("ADDING SHAPE " + sourceImage);
 
   // this will hold out drawing's vertices
   currentShape = new ProjectedShape( sourceImage );
@@ -306,7 +310,20 @@ void unloadImage( String location )
 
   imageFiles.remove(img);
   movieFiles.remove(img);
-
+  
+  ListIterator<ImageNode> imgNodesIter = loadedImagesNodes.listIterator();
+  
+  while( imgNodesIter.hasNext() )
+  {
+    ImageNode imgNode = imgNodesIter.next();
+    
+    if (imgNode.img == img)
+    {
+      imgNode.img = blankImage;
+      imgNodesIter.remove();
+    }
+  }
+  
   // look through shapes and null out image...
   for (ProjectedShape ps : shapes)
   {
@@ -358,6 +375,49 @@ PImage loadImageIfNecessary(String location)
 }
 
 
+GSMovie loadMovieIfNecessary(String location)
+{
+  String _location = "";
+
+  File f = new File(location);
+  _location = f.getName();
+
+  GSMovie loadedMovie = null;
+
+  if ( sourceMovies.containsKey( _location ) )
+  {
+    loadedMovie = sourceMovies.get( _location );
+  }
+  else
+  {
+    loadedMovie = new GSMovie( this, location );
+    sourceMovies.put( _location, loadedMovie );
+    sourceImages.put( _location, loadedMovie );
+    
+    DropdownList dl = (DropdownList)gui.getGroup("AvailableMovies");
+    dl.addItem(_location, sourceMovies.size());
+
+    /// add new image button
+
+    int numImages = sourceMovies.size();
+    int imgsPerRow = 4;
+    int imgW = width/8; // (width/2) / 4)
+    int imgIndex = loadedImagesNodes.size();
+
+    float imgx =  (imgIndex % imgsPerRow)*imgW;
+    float imgy =  (imgIndex/imgsPerRow)*imgW; 
+
+    loadedImagesNodes.add( new ImageNode(loadedMovie, imgx, imgy, imgW, imgW ) );
+
+    // map image to file location
+    movieFiles.put(loadedMovie, location);
+    loadedMovie.loop();
+  }
+
+  return loadedMovie;
+}
+
+
 // 
 // draw
 //
@@ -365,8 +425,11 @@ PImage loadImageIfNecessary(String location)
 void draw()
 {  
   
-  // beats
-      updateBeatStuff();
+  if (sequencing)
+  {
+    // beats
+    updateBeatStuff();
+  }
   background(0);
   
   // for rendering
@@ -481,24 +544,26 @@ void draw()
       
       PImage mappedImage = (PImage)destTex;
       // not mappedView.getTexture()
-
-
-    int ms = millis();
     pushMatrix();
-    Iterator<IAnimationModifier> iter = cameraAnimations.iterator();
     
-    while (iter.hasNext ())
+    if (sequencing)
     {
-      IAnimationModifier animod  = iter.next();
-      if (animod.isFinished())
+      int ms = millis();
+      
+      Iterator<IAnimationModifier> iter = cameraAnimations.iterator();
+      
+      while (iter.hasNext ())
       {
-        animod.stop();
-        iter.remove();
-        animod = null;
+        IAnimationModifier animod  = iter.next();
+        if (animod.isFinished())
+        {
+          animod.stop();
+          iter.remove();
+          animod = null;
+        }
+        else animod.update(ms);
       }
-      else animod.update(ms);
     }
-    
    image(mappedImage, 0, 0, width, height);  
    popMatrix();
   }

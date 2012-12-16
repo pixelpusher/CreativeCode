@@ -111,8 +111,9 @@ void keyReleased()
   else if (key == '/')
   {
     showFPS = false;
-    rendering = !rendering;
-    if (rendering) renderedFrames = 0;
+    //rendering = !rendering;
+    //if (rendering) renderedFrames = 0;
+    sequencing = !sequencing;
   }
 
   else if (key == '.')
@@ -221,6 +222,13 @@ void keyReleased()
   }
   else if (key == '~')
   {
+    
+    println("Chosing a file for saving:");
+    noLoop();
+    saveXMLFile();
+    loop();
+  
+  /*
     println("Chosing a file");
     noLoop();
     CONFIG_FILE_NAME = selectOutput("Choose a file name for the XML configuration:");
@@ -228,10 +236,15 @@ void keyReleased()
     createConfigXML();
     writeMainConfigXML();
     loop();
+    */
   }
   else if (key == '!')
   {
     readConfigXML();
+  }
+  else if (key == '@')
+  {
+    loadXMLFile();
   }
 }
 

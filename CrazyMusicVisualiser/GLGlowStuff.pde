@@ -8,8 +8,8 @@ GLTexture tmp2, tmp4, tmp8, tmp16;
 GLTextureFilter extractBloom, blur, blend4, toneMap;
 
 // glow texture params
-float fx = 0.02;
-float fy = 0.8;
+float fx = 0.05;
+float fy = 0.85;
 
 
 

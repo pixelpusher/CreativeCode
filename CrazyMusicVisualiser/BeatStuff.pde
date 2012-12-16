@@ -37,7 +37,6 @@ void updateBeatStuff()
   int ms = millis();
   beats[currentBeatIndex].update(ms*timeScale);
 
-
   Iterator<IAnimationModifier> iter = animModifiers.iterator();
     
     while (iter.hasNext())
@@ -297,6 +296,11 @@ BeatMatcher matcher2 = new BeatMatcher( beats[2].getMaxBeats() );
         }
    };
   
+  
+  
+  
+  
+  
   matcher2.addBeatEvent(0, ibe);
   matcher2.addBeatEvent(0, triggerBeatFader);  
   matcher2.addBeatEvent(0, scalePoint);
@@ -336,6 +340,27 @@ beats[0].addListener( matcher0 );
         }
   });
   
+  // TEST
+  //
+  //
+  matcher0.addBeatEvent( 3, 
+  new IBeatEvent() { 
+        public void trigger() { 
+          //println("next shape");
+          float r = random(0,1);
+          if (r < 0.25f)
+            CONFIG_FILE_NAME = "data/config1.xml";
+          else if (r < 0.5f)
+            CONFIG_FILE_NAME = "data/config2.xml";
+          else if (r < 0.8f)
+            CONFIG_FILE_NAME = "data/config3.xml";
+          else 
+            CONFIG_FILE_NAME = "data/config4.xml";
+            
+          readConfigXML();
+          nextBeatShape();
+        }
+   });
   
   matcher0.addBeatEvent( 0, 
 

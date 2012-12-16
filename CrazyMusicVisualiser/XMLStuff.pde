@@ -101,9 +101,9 @@ void createConfigXML()
       }
 
 
-      else if (ps.srcImage instanceof Movie)
+      else if (ps.srcImage instanceof GSMovie)
       {
-        String moviePath = movieFiles.get((Movie)ps.srcImage);
+        String moviePath = movieFiles.get((GSMovie)ps.srcImage);
 
         // same method we use when loading it...
         File f = new File(moviePath);
@@ -190,7 +190,7 @@ boolean readConfigXML()
     configXML = new XML (reader);
     XML shapeNodes[] = configXML.getChildren("shapes/shape");
 
-    println("XML: Found " + shapeNodes.length + " shape nodes");
+    //println("XML: Found " + shapeNodes.length + " shape nodes");
 
     //
     // HANDLE SHAPES
@@ -208,18 +208,18 @@ boolean readConfigXML()
       String shapeName = shapeNode.getString("name");
 
       // debug
-      println("["+i+"]: shape[" + shapeName + " :: mediaPath:" + mediaPath + " :: mediaType:" + mediaType+"**");
+      //println("["+i+"]: shape[" + shapeName + " :: mediaPath:" + mediaPath + " :: mediaType:" + mediaType+"**");
 
       ProjectedShape newShape = null;
 
       if (mediaType.equals(XML_MEDIA_MOVIE_TYPE))
       {
-        println("FOUND MOVIE!");
+        //println("FOUND MOVIE!");
 
         if (mediaPath != "")
         {
           // load Movie
-          Movie movie = new Movie(this, mediaPath);
+          GSMovie movie = new GSMovie(this, mediaPath);
 
           File f = new File(mediaPath);
           String pathEnd = f.getName();
@@ -241,7 +241,8 @@ boolean readConfigXML()
           newShape = addNewShape(movie);
 
           // finally, add to keyed array for this shape
-          sourceMovies.put(newShape, movie);
+          sourceMovies.put(newPath, movie);
+          movie.loop();
         }
         else
         {
@@ -251,7 +252,7 @@ boolean readConfigXML()
 
       else if (mediaType.equals(XML_MEDIA_IMAGE_TYPE))
       {
-        println("FOUND IMAGE!");
+        //println("FOUND IMAGE!");
 
         PImage sourceImage = blankImage;
 
@@ -265,14 +266,15 @@ boolean readConfigXML()
 
       else if (mediaType.equals(XML_MEDIA_OTHER_TYPE))
       {
-        println("FOUND OTHER!");
+        //println("FOUND OTHER!");
 
         // in this case dynamic graphics are loaded once at the start and stay loaded,
         // so we just look it up in the hashmap:
         DynamicGraphic sd = sourceDynamic.get(mediaPath);
 
         newShape = addNewShape(sd);
-        newShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
+//        newShape.srcColor = color(random(0, 255), random(0, 255), random(0, 255), 180);
+        newShape.srcColor = color(255,180);
         newShape.dstColor = newShape.srcColor;
         newShape.blendMode = ADD;
       }
@@ -280,7 +282,7 @@ boolean readConfigXML()
 
       if (newShape == null)
       {
-        println("ERROR:::creating shape failed!");
+        //println("ERROR:::creating shape failed!");
         return false;
       }
 
@@ -290,8 +292,8 @@ boolean readConfigXML()
 
       XML vertexNodes[] = vertsNode.getChildren("vertex");
 
-      println("XML: Found " + vertexNodes.length + " verts");
-      print(" :: (should be " + vertsNode.getString("count") + ")");
+      //println("XML: Found " + vertexNodes.length + " verts");
+      //print(" :: (should be " + vertsNode.getString("count") + ")");
 
       for (int v=0; v < vertexNodes.length; ++v)
       {

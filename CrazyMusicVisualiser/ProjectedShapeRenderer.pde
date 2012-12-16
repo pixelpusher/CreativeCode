@@ -16,7 +16,7 @@
 //import javax.media.opengl.GL2;
 
 
-final int BlendModes[] = {DIFFERENCE,LIGHTEST,MULTIPLY,ADD,BLEND};
+final int BlendModes[] = {DIFFERENCE,LIGHTEST,ADD,BLEND};
   
 class ProjectedShapeRenderer
 {
