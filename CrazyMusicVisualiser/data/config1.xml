@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config updated="2012.12.15-19:54:55" version="1.0">
+  <shapes>
+    <shape media="psychowhitney" mediaPath="psychowhitney" mediaType="other" name="shape2.2280448E8">
+      <vertices count="4">
+        <vertex dx="0.0" dy="0.0" sx="0.0" sy="0.0"/>
+        <vertex dx="1024.0" dy="0.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="1024.0" dy="768.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="0.0" dy="768.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape1.36911872E8">
+      <vertices count="4">
+        <vertex dx="-7.0" dy="208.0" sx="0.0" sy="0.0"/>
+        <vertex dx="362.0" dy="190.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="384.0" dy="536.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="-4.0" dy="556.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape1.63563776E9">
+      <vertices count="4">
+        <vertex dx="725.0" dy="184.0" sx="0.0" sy="0.0"/>
+        <vertex dx="1081.0" dy="321.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="959.0" dy="599.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="627.0" dy="483.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+    <shape media="psychowhitney" mediaPath="psychowhitney" mediaType="other" name="shape2.55624576E8">
+      <vertices count="4">
+        <vertex dx="5.0" dy="753.0" sx="0.0" sy="0.0"/>
+        <vertex dx="1009.0" dy="750.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="1018.0" dy="8.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="3.0" dy="3.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+  </shapes>
+</config>

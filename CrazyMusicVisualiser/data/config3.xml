@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config updated="2012.12.15-20:4:28" version="1.0">
+  <shapes>
+    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape1.73086848E8">
+      <vertices count="4">
+        <vertex dx="62.0" dy="188.0" sx="0.0" sy="0.0"/>
+        <vertex dx="224.0" dy="238.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="182.0" dy="416.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="36.0" dy="366.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+    <shape media="whitney" mediaPath="whitney" mediaType="other" name="shape2.05264E8">
+      <vertices count="4">
+        <vertex dx="258.0" dy="220.0" sx="0.0" sy="0.0"/>
+        <vertex dx="400.0" dy="196.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="416.0" dy="338.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="262.0" dy="382.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+    <shape media="boombox128.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape3.48694912E8">
+      <vertices count="8">
+        <vertex dx="42.0" dy="126.0" sx="2.0" sy="4.0"/>
+        <vertex dx="208.0" dy="180.0" sx="56.0" sy="4.0"/>
+        <vertex dx="302.0" dy="188.0" sx="188.0" sy="6.0"/>
+        <vertex dx="442.0" dy="194.0" sx="258.0" sy="4.0"/>
+        <vertex dx="432.0" dy="308.0" sx="258.0" sy="132.0"/>
+        <vertex dx="362.0" dy="336.0" sx="186.0" sy="130.0"/>
+        <vertex dx="172.0" dy="402.0" sx="76.0" sy="132.0"/>
+        <vertex dx="48.0" dy="432.0" sx="2.0" sy="132.0"/>
+      </vertices>
+    </shape>
+    <shape media="adidasGold128.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/adidasGold128.png" mediaType="image" name="shape1.09432269E9">
+      <vertices count="4">
+        <vertex dx="88.0" dy="162.0" sx="0.0" sy="0.0"/>
+        <vertex dx="88.0" dy="84.0" sx="64.0" sy="0.0"/>
+        <vertex dx="472.0" dy="30.0" sx="64.0" sy="128.0"/>
+        <vertex dx="472.0" dy="196.0" sx="0.0" sy="128.0"/>
+      </vertices>
+    </shape>
+    <shape media="boombox128.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape9.783415E8">
+      <vertices count="4">
+        <vertex dx="92.0" dy="518.0" sx="0.0" sy="0.0"/>
+        <vertex dx="82.0" dy="608.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="460.0" dy="670.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="480.0" dy="336.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+    <shape media="boombox128.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape1.56692646E9">
+      <vertices count="4">
+        <vertex dx="508.0" dy="140.0" sx="0.0" sy="0.0"/>
+        <vertex dx="890.0" dy="30.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="884.0" dy="396.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="508.0" dy="240.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+    <shape media="boombox128.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape1.58437107E9">
+      <vertices count="4">
+        <vertex dx="514.0" dy="294.0" sx="0.0" sy="0.0"/>
+        <vertex dx="858.0" dy="450.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="858.0" dy="506.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="532.0" dy="548.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+    <shape media="psychowhitney" mediaPath="psychowhitney" mediaType="other" name="shape1.65046733E9">
+      <vertices count="4">
+        <vertex dx="92.0" dy="518.0" sx="0.0" sy="0.0"/>
+        <vertex dx="82.0" dy="608.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="460.0" dy="670.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="480.0" dy="336.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+  </shapes>
+</config>
