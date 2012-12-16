@@ -206,7 +206,7 @@ void setup()
 
   shapes = new LinkedList<ProjectedShape>();
   sourceImages = new HashMap<String, PImage>(); 
-  //sourceMovies = new HashMap<ProjectedShape,Movie>();
+  sourceMovies = new HashMap<String,GSMovie>();
   sourceDynamic = new HashMap<String, DynamicGraphic>();
 
   imageFiles = new HashMap<PImage, String>();
@@ -285,22 +285,22 @@ void resetAllData()
     projShape.clear();
   }
   shapes.clear();
-  
-  shapes = new LinkedList<ProjectedShape>();
-
+ 
   // TODO: better way to unload these?
-  sourceImages = new HashMap<String, PImage>(); 
-  sourceMovies = new HashMap<String, GSMovie>();
-
+  sourceMovies.clear();
+ 
   // probably don't want to reset dynamic images because there is no way to recreate them!
   //sourceDynamic = new HashMap<String, PGraphics>();
   // TODO: then re-add them to list of sourceImages
+
+  
+  DropdownList dl = (DropdownList)gui.getGroup("AvailableImages");
+  dl.clear();
 
   for (String k : sourceDynamic.keySet())
   {
     PGraphics pg = sourceDynamic.get(k);
     addPGraphicsToImagesList(k, pg );
-    
   }
 }
 
