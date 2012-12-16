@@ -25,7 +25,7 @@ public class LissajousDrawing extends DynamicGraphic
     // Maybe we want to register copies with different params under different names...
     // Or potentially check for other entries in the HashMap and save to a different name
     sourceDynamic.put( NAME, this );
-    sourceImages.put( NAME, this );
+    addPGraphicsToImagesList( NAME, this );
   }
 
   void initialize()

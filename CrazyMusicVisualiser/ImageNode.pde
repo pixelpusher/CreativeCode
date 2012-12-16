@@ -57,7 +57,12 @@ class ImageNode extends DrawableNode
     }
 
     renderer.imageMode(CORNER);
-    renderer.image(img, minX, minY, w, h);
+    PImage i = img;
+    
+    if (img instanceof GLGraphicsOffScreen)
+      i = ((GLGraphicsOffScreen)img).getTexture();
+
+    renderer.image(i, minX, minY, w, h);
   }
   
   

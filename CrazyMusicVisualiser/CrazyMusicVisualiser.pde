@@ -211,7 +211,8 @@ void setup()
 
   imageFiles = new HashMap<PImage, String>();
   movieFiles = new HashMap<GSMovie, String>();
-
+  
+  loadedImagesNodes = new ArrayList<DrawableNode>();
   // load my image as a test
   // PImage sourceImage = loadImageIfNecessary("7sac9xt9.bmp");
 
@@ -227,8 +228,6 @@ void setup()
 
   setupBR();
 
-  loadedImagesNodes = new ArrayList<DrawableNode>();
-
   hint(DISABLE_DEPTH_TEST);
 
   // finally, read in XML config
@@ -240,14 +239,53 @@ void setup()
 
 void resetAllData()
 {
-  // clear all shape refs
+  Set<String> keys = sourceImages.keySet();
+  Iterator<String> keyIter = keys.iterator();
+  
+  while( keyIter.hasNext() )
+  {
+    String imgName = keyIter.next();
+    
+    PImage img = sourceImages.get( imgName );
+    
+    imageFiles.remove(img);
+    movieFiles.remove(img);
+  
+    ListIterator<DrawableNode> imgNodesIter = loadedImagesNodes.listIterator();
+    
+    while( imgNodesIter.hasNext() )
+    {
+      DrawableNode dnode = imgNodesIter.next();
+      if (dnode instanceof ImageNode)
+      {
+        ImageNode imgNode = (ImageNode)dnode;
+        
+        if (imgNode.img == img)
+        {
+          imgNode.img = blankImage;
+          imgNodesIter.remove();
+        }
+      }
+    }
+  
+    // look through shapes and null out image...
+    for (ProjectedShape ps : shapes)
+    {
+      if (ps.srcImage == img)
+      {
+        ps.srcImage = blankImage;
+      }
+    }
+  }
+  sourceImages.clear();
+
+// clear all shape refs
   for (ProjectedShape projShape : shapes)
   {
     projShape.clear();
   }
   shapes.clear();
-  sourceImages.clear();
-
+  
   shapes = new LinkedList<ProjectedShape>();
 
   // TODO: better way to unload these?
@@ -261,10 +299,31 @@ void resetAllData()
   for (String k : sourceDynamic.keySet())
   {
     PGraphics pg = sourceDynamic.get(k);
-    sourceImages.put(k, pg);
+    addPGraphicsToImagesList(k, pg );
+    
   }
 }
 
+
+void addPGraphicsToImagesList(String key, PGraphics pg)
+{
+    sourceImages.put(key, pg);
+    
+    DropdownList dl = (DropdownList)gui.getGroup("AvailableImages");
+    dl.addItem(key, sourceImages.size());
+
+    /// add new image button
+
+    int numImages = sourceImages.size();
+    int imgsPerRow = 4;
+    int imgW = width/8; // (width/2) / 4)
+    int imgIndex = loadedImagesNodes.size();
+
+    float imgx =  (imgIndex % imgsPerRow)*imgW;
+    float imgy =  (imgIndex/imgsPerRow)*imgW; 
+
+    loadedImagesNodes.add( new ImageNode(pg, imgx, imgy, imgW, imgW ) );
+}
 
 
 ProjectedShape addNewShape(PImage sourceImage)
@@ -311,16 +370,20 @@ void unloadImage( String location )
   imageFiles.remove(img);
   movieFiles.remove(img);
   
-  ListIterator<ImageNode> imgNodesIter = loadedImagesNodes.listIterator();
+  ListIterator<DrawableNode> imgNodesIter = loadedImagesNodes.listIterator();
   
   while( imgNodesIter.hasNext() )
   {
-    ImageNode imgNode = imgNodesIter.next();
-    
-    if (imgNode.img == img)
+    DrawableNode dnode = imgNodesIter.next();
+    if (dnode instanceof ImageNode)
     {
-      imgNode.img = blankImage;
-      imgNodesIter.remove();
+      ImageNode imgNode = (ImageNode)imgNodesIter.next();
+      
+      if (imgNode.img == img)
+      {
+        imgNode.img = blankImage;
+        imgNodesIter.remove();
+      }
     }
   }
   
@@ -430,7 +493,6 @@ void draw()
     // beats
     updateBeatStuff();
   }
-  background(0);
   
   // for rendering
   //  incTime();
@@ -438,10 +500,8 @@ void draw()
   //
   // DEBUG
   //
-
   //PsychedelicWhitney psw = (PsychedelicWhitney)(sourceDynamic.get( PsychedelicWhitney.NAME ));
   //psw.strategy1();
-
 
   // delete shape here to avoid accessing linked list during middle of draw()
   if (deleteShape)
@@ -461,89 +521,81 @@ void draw()
 
   background(0);
 
-  if (displayMode == SHOW_IMAGES)
+  shapeRenderer.beginRender(mappedView);
+
+  for (ProjectedShape projShape : shapes)
   {
+    //if ( projShape != currentShape)
+    //{
+    //  mappedView.pushMatrix();
+    //  mappedView.translate(projShape.srcImage.width, 0);
+    shapeRenderer.draw(projShape);
+    //  mappedView.popMatrix();
+    //}
+  }
+
+  if (displayMode == SHOW_SOURCE || displayMode == EDIT_MAPPED || displayMode == SHOW_IMAGES)
+    shapeRenderer.drawDestShape(currentShape);
+
+  shapeRenderer.endRender();
+  // done with drawing mapped shapes
+
+  if (displayMode == SHOW_SOURCE)
+  {
+    // start drawing source shapes
+    shapeRenderer.beginRender(editingShapesView, true);
+
+    // draw shape we're editing currently
+    shapeRenderer.drawSourceShape(currentShape, drawImage);
+
+    shapeRenderer.endRender();
+
+    //
+    // post-render glow effect
+    //
+    doGLGlow(mappedView);
+
+    PImage mappedImage = (PImage)destTex;
+    // not mappedView.getTexture()
+
+    noTint();
+    image(editingShapesView.getTexture(), 0, 0);
+    image(mappedImage, width/2, 0, width/2, height/2);
+    strokeWeight(3);
+    stroke(255);
+    line(width/2-1, 0, width/2-1, height);
+  }
+  else if (displayMode == SHOW_IMAGES)
+  {
+    
     for (DrawableNode node : loadedImagesNodes)
     {
       node.draw(this.g);
     }
+    
+    //
+    // post-render glow effect
+    //
+    doGLGlow(mappedView);
 
-    /*
-    int numImages = sourceImages.size();
-     int imgsPerRow = 4;
-     int imgW = width/8; // (width/2) / 4)
-     int count = 0;
-     
-     for (PImage srcimg : sourceImages.values())
-     {
-     if (srcimg instanceof GLGraphicsOffScreen)
-     srcimg = ((GLGraphicsOffScreen)srcimg).getTexture();
-     
-     image(srcimg, (count % imgsPerRow)*imgW, floor(count/imgsPerRow)*imgW, imgW, imgW); 
-     ++count;
-     }
-     */
+    PImage mappedImage = (PImage)destTex;
+    // not mappedView.getTexture()
+
+    noTint();
+
+    image(mappedImage, width/2, 0, width/2, height/2);
+    strokeWeight(3);
+    stroke(255);
+    line(width/2-1, 0, width/2-1, height);
   }
+  // now draw for reals
   else
   {
-    shapeRenderer.beginRender(mappedView, true);
-  
-    for (ProjectedShape projShape : shapes)
-    {
-      //if ( projShape != currentShape)
-      //{
-      //  mappedView.pushMatrix();
-      //  mappedView.translate(projShape.srcImage.width, 0);
-      shapeRenderer.draw(projShape);
-      //  mappedView.popMatrix();
-      //}
-    }
+    drawBR(mappedView);
+    doGLGlow(mappedView);
 
-    if (displayMode == SHOW_SOURCE || displayMode == EDIT_MAPPED)
-      shapeRenderer.drawDestShape(currentShape);
-
-    shapeRenderer.endRender();
-    // done with drawing mapped shapes
-
-
-    if (displayMode == SHOW_SOURCE)
-    {
-      // start drawing source shapes
-      shapeRenderer.beginRender(editingShapesView);
-
-      // draw shape we're editing currently
-      shapeRenderer.drawSourceShape(currentShape, drawImage);
-
-      shapeRenderer.endRender();
-
-
-      //
-      // post-render glow effect
-      //
-      doGLGlow(mappedView);
-
-      PImage mappedImage = (PImage)destTex;
-      // not mappedView.getTexture()
-
-      noTint();
-      image(editingShapesView.getTexture(), 0, 0);
-      image(mappedImage, width/2, 0, width/2, height/2);
-      strokeWeight(3);
-      stroke(255);
-      line(width/2-1, 0, width/2-1, height);
-    }
-
-    // now draw for reals
-    else
-    {
-
- 
-      drawBR(mappedView);
-      doGLGlow(mappedView);
-
-      
-      PImage mappedImage = (PImage)destTex;
-      // not mappedView.getTexture()
+    PImage mappedImage = (PImage)destTex;
+    // not mappedView.getTexture()
     pushMatrix();
     
     if (sequencing)
@@ -568,33 +620,33 @@ void draw()
    popMatrix();
   }
 
+  noStroke();
 
-    noStroke();
-
-    // BLEND MODE LEAKS!
-    // That's why this is necessary
-    shapeRenderer.screenBlend(BLEND, (PGraphicsOpenGL)(this.g));
-    
-    if (showFPS)
-    {
-      //      fill(255);
-      text("fps: " + nfs(frameRate, 3, 2), 4, height-18);
-    }
-    switch( displayMode )
-    {
-    case SHOW_MAPPED:
-      break;
-    case EDIT_MAPPED:
-      break;
-    case SHOW_SOURCE:
-      fill(255);
-      strokeWeight(1);
-      line(0, height-36, width, height-36);
-      text("SOURCE IMAGE", 4, height-38);
-      text("MAPPED IMAGE", width/2+5, height-38);
-      break;
-    }
+  // BLEND MODE LEAKS!
+  // That's why this is necessary
+  shapeRenderer.screenBlend(BLEND, (PGraphicsOpenGL)(this.g));
+  
+  if (showFPS)
+  {
+    //      fill(255);
+    text("fps: " + nfs(frameRate, 3, 2), 4, height-18);
   }
+  switch( displayMode )
+  {
+  case SHOW_MAPPED:
+    break;
+  case EDIT_MAPPED:
+    break;
+  case SHOW_SOURCE:
+  case SHOW_IMAGES:
+    fill(255);
+    strokeWeight(1);
+    line(0, height-36, width, height-36);
+    text("SOURCE IMAGE LIST", 4, height-38);
+    text("MAPPED IMAGE", width/2+5, height-38);
+    break;
+  }
+
   // end draw
 
   
@@ -719,9 +771,8 @@ void mousePressed()
         {
           currentShape.srcImage = ((ImageNode)node).img;
         }
-        displayMode = SHOW_SOURCE;
+        //displayMode = SHOW_SOURCE;
       }
-
 
       break;
       // end mode switch

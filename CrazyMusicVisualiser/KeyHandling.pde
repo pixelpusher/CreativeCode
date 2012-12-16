@@ -179,6 +179,9 @@ void keyReleased()
     ++displayMode;
     if (displayMode > SHOW_IMAGES)
       displayMode = SHOW_SOURCE;
+    // turn on sequencing?
+    sequencing = (displayMode == SHOW_MAPPED || displayMode == EDIT_MAPPED);
+      
   }
   else if (key == '[') 
   {

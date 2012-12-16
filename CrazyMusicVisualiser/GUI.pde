@@ -10,6 +10,11 @@ int guiY = 40;
 void initGUI()
 {
   gui = new ControlP5(this);
+  
+  Slider slider = gui.addSlider("fx", 0.001f, 1f, 0.1f, guiX, guiY, 200, 10);
+  guiY += slider.getHeight()+2;
+  slider = gui.addSlider("fy", 0.001f, 1f, 0.1f, guiX, guiY, 200, 10);
+  guiY += slider.getHeight()+2;
   gui.addButton("buttonLoadImage", 0, guiX, guiY, 100,20);
   gui.addButton("buttonLoadMovie", 0, guiX+200, guiY, 100,20);
   guiY += 30;
@@ -18,9 +23,7 @@ void initGUI()
   guiY += 30;
 
 
-  Slider slider = gui.addSlider("fx", 0.001f, 1f, 0.1f, guiX, guiY, 200, 20);
-  guiY += slider.getHeight()+2;
-  slider = gui.addSlider("fy", 0.001f, 1f, 0.1f, guiX, guiY, 200, 20);
+ 
   gui.hide();
 
 }
