@@ -34,7 +34,7 @@ LinkedList<DrawableNode> nodesToCollide = null;
 ColorPicker cpFill, cpStroke;
 
 static final String spriteImages[] = { 
-  "tv.png", "blue-acrobats.png", "whitetoady.png"
+  "tv.png", "blue-acrobats.png", "whitetoady.png", "tard2headx32.png", "skullhand128.png", "boombox1_64.png"
 };
 
 final color tintColors[] = {color(100,20), color(0,100,0,20), color(160,0,0,20) };
@@ -60,8 +60,8 @@ boolean loadingGUIPreset = false;
 float desiredseparation = 25.0;
 float avoidWallsFactor = 0.8;
 float charAttract = 3.8;
-float attraction = 0.08;
-float neighbordist = 25.0;
+//float attraction = 0.08;
+//float neighbordist = 25.0;
 color boidFill = color(255, 30, 0);
 color boidStroke = color(255, 0, 0);
 float boidMaxSpeed = 8, boidMaxForce=0.8;
@@ -99,7 +99,7 @@ void setupBR()
     // Add an initial set of boids into the system
     for (int ii = 0; ii < BOIDS; ++ii) 
     {
-      flocks[i].addBoid(new Boid(new PVector(width/2, height/2), boidMaxSpeed, boidMaxForce, spriteTexs[i]));
+      flocks[i].addBoid(new Boid(new PVector(width/2, height/2), spriteTexs[i]));
     }
 //    flocks[i].active = true;
   }

@@ -47,7 +47,6 @@ import ddf.minim.*;
 import ddf.minim.analysis.*;
 
 
-
 Minim minim;
 AudioInput in;
 FFT fft;
@@ -92,14 +91,12 @@ boolean rendering = false;  // for writing to disk
 
 boolean sequencing = true; // beat sequencer toggle
 
-
 int displayMode = SHOW_MAPPED;  
 
 final float distance = 15;
 final float distanceSquared = distance*distance;  // in pixels, for selecting verts
 
 GLGraphicsOffScreen editingShapesView, mappedView; // destination output 
-
 
 boolean drawImage = true;
 PFont calibri;
@@ -290,10 +287,6 @@ void resetAllData()
   sourceMovies.clear();
  
   // probably don't want to reset dynamic images because there is no way to recreate them!
-  //sourceDynamic = new HashMap<String, PGraphics>();
-  // TODO: then re-add them to list of sourceImages
-
-  
   DropdownList dl = (DropdownList)gui.getGroup("AvailableImages");
   dl.clear();
 

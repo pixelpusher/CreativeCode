@@ -1,5 +1,7 @@
 // The Boid class
 
+int boidLifetime = 100;
+
 class Boid {
 
   PVector loc;
@@ -7,10 +9,12 @@ class Boid {
   PVector acc;
   float r;
   GLTexture tex;
-  float maxforce;
+//  float maxforce;
+  int life;
+  boolean alive;
+  boolean immortal;
 
-
-  Boid(PVector l, float ms, float mf, GLTexture _tex) 
+  Boid(PVector l, GLTexture _tex) 
   {
     acc = new PVector(0, 0);
     vel = new PVector(random(-2, 2), random(-2, 2));
@@ -18,15 +22,19 @@ class Boid {
     r = 2.0 + random(-1, 1);
 
     tex = _tex;
+    life = boidLifetime-int(random(boidLifetime*0.25));
+    alive = true;
+    immortal = true;
+    
   }
 
 
-  void seek(PVector target, float maxspeed) {
-    accelerate(steer(target, maxspeed));
+  void seek(PVector target, float maxspeed, float maxforce) {
+    accelerate(steer(target, maxspeed, maxforce));
   }
 
-  void arrive(PVector target, float maxspeed) {
-    accelerate(steer(target, maxspeed));
+  void arrive(PVector target, float maxspeed, float maxforce) {
+    accelerate(steer(target, maxspeed, maxforce));
   }
 
 
@@ -90,15 +98,12 @@ class Boid {
   }
 
 
-  Boid accelerate(PVector accel)
+  Boid accelerate(PVector a)
   {
-    
-    acc.add( accel );
-    acc.limit(maxforce);
-    return this;
+    return accelerate(a.x,a.y,a.z);
   }
 
-  Boid accelerate(float ax, float ay)
+  Boid accelerate(float ax, float ay, float maxforce)
   {
     acc.add( ax, ay, 0f );
     acc.limit(maxforce);

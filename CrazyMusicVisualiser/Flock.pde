@@ -15,9 +15,15 @@ class Flock
    color boidStroke = color(255, 0, 0);
    float boidMaxSpeed = 8, boidMaxForce=0.8;
    */
+  float attraction = 0.08;
+  float neighbordist = 25.0;
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
 
+  float spawnX, spawnY;
+  int toReanimate = 0; 
+
+  int maxToReanimatePerFrame = 2;
 
   Flock() 
   {
@@ -31,51 +37,64 @@ class Flock
 
   // We accumulate a new acceleration each time based on three rules
   void flock() 
-  {
-    maxspeed = boidMaxSpeed;
-    maxforce = boidMaxForce;
-
+  {    
+    int reanimated = 0;
 
     for (Boid b : boids)
     {
-      b.maxforce = maxforce;
-      PVector sep = separate(b, boids);   // Separation
-      PVector ali = align(b, boids);      // Alignment
-      //PVector coh = cohesion(b, boids);   // Cohesion
-      // Arbitrarily weight these forces
-      sep.mult(1.0);
-      ali.mult(0.6);
-      //coh.mult(0.2);
+      if (b.alive)
+      {
+        if (!b.immortal)
+          b.life--;
+        if (b.life < 1)
+          b.alive = false;
+        else
+        {
+          //b.maxforce = maxforce;
+          PVector sep = separate(b, boids);   // Separation
+          sep.z = maxforce;
+          PVector ali = align(b, boids);      // Alignment
+          ali.z = maxforce; //FIXME
+          //PVector coh = cohesion(b, boids);   // Cohesion
+          // Arbitrarily weight these forces
+          sep.mult(1.0);
+          ali.mult(0.6);
+          //coh.mult(0.2);
+          
+          sep.z = maxforce;
+          ali.z = maxforce; //FIXME
 
-      // Add the force vectors to acceleration
-      b.accelerate( sep );
-      //b.applyAcceleration(maxforce, maxspeed);
-      b.accelerate( ali);
-      //b.accelerate( coh );
-      update(b);
-      b.render(renderer);
+          // Add the force vectors to acceleration
+          b.accelerate( sep );
+          //b.applyAcceleration(maxforce, maxspeed);
+          b.accelerate( ali);
+          //b.accelerate( coh );
+          update(b);
+          b.render(renderer);
+        }
+      }
+      else if (toReanimate > 0 && reanimated < maxToReanimatePerFrame)
+      {
+        reanimated++;
+        toReanimate--;
+        b.alive = true;
+        b.life = boidLifetime-int(random(boidLifetime*0.25));
+        b.loc.x = spawnX;
+        b.loc.y = spawnY;
+      }
     }
   }
 
-
   void run(PGraphics _renderer) 
   {
-    renderer = _renderer;
 
     if (active)
     {
+      renderer = _renderer;
+      spawnX = renderer.width/2;
+      spawnY = renderer.height/2;
+      
       flock();
-      /*
-      ListIterator<Boid> li = boids.listIterator();
-       
-       while (li.hasNext ())
-       {
-       Boid b = li.next();
-       
-       b.render(renderer);
-       if (hit) li.remove();
-       }
-       */
     }
     // end run
   }
@@ -99,6 +118,7 @@ class Flock
   {
     boolean hit = false;
 
+
     //    Avoid walls
     float dLeft = b.loc.x;
     float dRight = width-b.loc.x;
@@ -119,7 +139,7 @@ class Flock
     if (dBot > EPSILON)
       sumAccelY -= (1f/dBot)*avoidWallsFactor;
 
-    b.accelerate(sumAccelX, sumAccelY);
+    b.accelerate(sumAccelX, sumAccelY, maxforce);
 
     // attraction towards "characters"
 
@@ -142,7 +162,7 @@ class Flock
         float cX = dirX*dInv;
         float cY = dirY*dInv;
 
-        b.accelerate(cX, cY);
+        b.accelerate(cX, cY, maxforce);
       }
     }
 
@@ -158,7 +178,6 @@ class Flock
   // Method checks for nearby boids and steers away
   PVector separate (Boid b, LinkedList<Boid> boids)
   {
-
     PVector sum = new PVector(0, 0, 0);
     int count = 0;
     // For every boid in the system, check if it's too close
@@ -183,10 +202,10 @@ class Flock
     }
     /*
     if (count > 0) 
-    {
-      sum.div((float)count);
-    }
-    */
+     {
+     sum.div((float)count);
+     }
+     */
     // As long as the vector is greater than 0
     if (sum.mag() > 0) {
       // Implement Reynolds: Steering = Desired - Velocity
