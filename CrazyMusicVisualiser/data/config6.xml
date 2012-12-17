@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config updated="2012.12.17-0:29:15" version="1.0">
+  <shapes>
+    <shape media="whitney2" mediaPath="whitney2" mediaType="other" name="shape1.00021952E9">
+      <vertices count="4">
+        <vertex dx="504.0" dy="8.0" sx="500.0" sy="158.0"/>
+        <vertex dx="2.0" dy="6.0" sx="4.0" sy="158.0"/>
+        <vertex dx="6.0" dy="774.0" sx="6.0" sy="774.0"/>
+        <vertex dx="500.0" dy="772.0" sx="500.0" sy="772.0"/>
+      </vertices>
+    </shape>
+    <shape media="tard2.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/tard2.png" mediaType="image" name="shape9.7194918E8">
+      <vertices count="4">
+        <vertex dx="534.0" dy="238.0" sx="0.0" sy="0.0"/>
+        <vertex dx="1046.0" dy="238.0" sx="512.0" sy="0.0"/>
+        <vertex dx="1044.0" dy="778.0" sx="512.0" sy="512.0"/>
+        <vertex dx="534.0" dy="772.0" sx="0.0" sy="512.0"/>
+      </vertices>
+    </shape>
+    <shape media="tard2.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/tard2.png" mediaType="image" name="shape9.478295E8">
+      <vertices count="4">
+        <vertex dx="468.0" dy="238.0" sx="0.0" sy="0.0"/>
+        <vertex dx="8.0" dy="242.0" sx="512.0" sy="0.0"/>
+        <vertex dx="10.0" dy="764.0" sx="512.0" sy="512.0"/>
+        <vertex dx="470.0" dy="768.0" sx="0.0" sy="512.0"/>
+      </vertices>
+    </shape>
+    <shape media="whitney2" mediaPath="whitney2" mediaType="other" name="shape1.76593024E8">
+      <vertices count="4">
+        <vertex dx="504.0" dy="0.0" sx="500.0" sy="158.0"/>
+        <vertex dx="1018.0" dy="0.0" sx="4.0" sy="158.0"/>
+        <vertex dx="1022.0" dy="768.0" sx="6.0" sy="774.0"/>
+        <vertex dx="506.0" dy="768.0" sx="500.0" sy="772.0"/>
+      </vertices>
+    </shape>
+  </shapes>
+</config>

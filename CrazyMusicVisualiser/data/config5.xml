@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config updated="2012.12.17-0:30:41" version="1.0">
+  <shapes>
+    <shape media="whitney2" mediaPath="whitney2" mediaType="other" name="shape6.8815091E8">
+      <vertices count="4">
+        <vertex dx="140.0" dy="42.0" sx="0.0" sy="0.0"/>
+        <vertex dx="894.0" dy="36.0" sx="1024.0" sy="0.0"/>
+        <vertex dx="1022.0" dy="764.0" sx="1024.0" sy="1024.0"/>
+        <vertex dx="-2.0" dy="764.0" sx="0.0" sy="1024.0"/>
+      </vertices>
+    </shape>
+    <shape media="rose.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/rose.png" mediaType="image" name="shape1.36861606E9">
+      <vertices count="4">
+        <vertex dx="438.0" dy="292.0" sx="0.0" sy="0.0"/>
+        <vertex dx="694.0" dy="292.0" sx="256.0" sy="0.0"/>
+        <vertex dx="694.0" dy="548.0" sx="256.0" sy="256.0"/>
+        <vertex dx="438.0" dy="548.0" sx="0.0" sy="256.0"/>
+      </vertices>
+    </shape>
+  </shapes>
+</config>

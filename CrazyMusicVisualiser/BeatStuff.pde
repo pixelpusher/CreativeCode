@@ -251,9 +251,9 @@ BeatMatcher matcher2 = new BeatMatcher( beats[2].getMaxBeats() );
           String newConfigFile = null;
           
           float r = random(0,1);
-          if (r < 0.25f)
+          if (r < 0.15f)
           {
-            newConfigFile = "data/config6.xml";
+            newConfigFile = "data/config7.xml";
           }
           else
             newConfigFile = "data/config1.xml";
@@ -306,7 +306,7 @@ beats[0].addListener( matcher0 );
           String newConfigFile = null;
           
           float r = random(0,1);
-          if (r < 0.25f)
+          if (r < 0.3f)
           {
             PsychedelicWhitney pw  = (PsychedelicWhitney)(sourceDynamic.get( PsychedelicWhitney.NAME));
             pw.setTexture(kitPart);
@@ -321,7 +321,7 @@ beats[0].addListener( matcher0 );
             pw.setTexture(kitPart);
             newConfigFile = "data/config2.xml";
           }
-          else if (r < 0.8f)
+          else if (r < 0.7f)
           {
           for (int i=0; i<flocks.length; i++)
             if (random(0,1) >= 0.5)
@@ -329,7 +329,7 @@ beats[0].addListener( matcher0 );
 
             newConfigFile = "data/config3.xml";
           }
-          else 
+          else if (r < 0.9f)
           {
             newConfigFile = "data/config4.xml";
             for (int i=0; i<flocks.length; i++)
@@ -338,13 +338,19 @@ beats[0].addListener( matcher0 );
             PsychedelicWhitney pw  = (PsychedelicWhitney)(sourceDynamic.get( PsychedelicWhitney.NAME));
             pw.setTexture(grumpyKitPart);
           } 
-          
+          else 
+          {
+            newConfigFile = "data/config7.xml";
+            for (int i=0; i<flocks.length; i++)
+              flocks[i].active = false;
+          } 
           if (!(CONFIG_FILE_NAME.equals( newConfigFile )) )
           {
             CONFIG_FILE_NAME = newConfigFile;
+            readConfigXML();
+            nextBeatShape();
           }
-          readConfigXML();
-          nextBeatShape();
+          
         }
    };
   

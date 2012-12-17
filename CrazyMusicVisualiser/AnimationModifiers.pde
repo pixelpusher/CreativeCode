@@ -75,7 +75,7 @@ class FadeGlowOnBeat implements IAnimationModifier
   {
     float beat = beats[currentBeatIndex].getPartialBeat() % 1f; // 1/4
 
-    fy = beat*beat*0.9f;
+    fy = sqrt(beat)*0.8f;
 
     if (beats[currentBeatIndex].getBeatChanged()) 
     {
