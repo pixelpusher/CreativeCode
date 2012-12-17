@@ -34,13 +34,12 @@ public class LissajousDrawing extends DynamicGraphic
     radii = new float[this.width]; // list of radii
 
     rotation = 0f;
-    speed = 2; // how fast it scrolls across the screen (0 is not moving)
+    speed = 0.02; // how fast it scrolls across the screen (0 is not moving)
     periods = 1;
-    speed = 0f;
 
     this.beginDraw();      
     this.smooth();
-    this.colorMode(HSB, 1);
+    //this.colorMode(HSB, 1);
     // this.noStroke();
     this.background(0);
     this.endDraw();
@@ -52,16 +51,17 @@ public class LissajousDrawing extends DynamicGraphic
   //
   void pre()
   {
-
-/*
+    periods = (periods+0.01) % 16f; 
+    /*
     GL gl = this.beginGL();
-    gl.glClearColor(0f, 0f, 0f, 0f);
-    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-    this.endGL();
-*/
-
+     gl.glClearColor(0f, 0f, 0f, 0f);
+     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+     this.endGL();
+     */
+    this.beginDraw();
+    this.background(0);    
     //this.smooth();
-    this.colorMode(HSB, 1);
+    //this.colorMode(HSB, 1);
     this.strokeWeight(4);
 
     rotation = millis() * speed;
@@ -95,22 +95,22 @@ public class LissajousDrawing extends DynamicGraphic
       radii[index] = heightValue;
 
 
-      float waveStartY = height/8;
-      float waveStartX = width/64;
+      float waveStartY = this.height/8;
+      float waveStartX = this.width/64;
 
-      float waveX = waveStartX + map(index, 0, numPoints, 0, width/2);
+      float waveX = waveStartX + map(index, 0, numPoints, 0, this.width/2);
       float waveY = waveStartY + heightValue;
 
-      float circleCenterX = width/4 + waveStartX;
-      float circleCenterY = height/4;
+      float circleCenterX = this.width/4 + waveStartX;
+      float circleCenterY = this.height/4;
 
-      float circleR = height/2;
+      float circleR = this.height/2;
 
       float circleX = circleCenterX + circleR * cosVal;
       float circleY = circleCenterY + circleR * sinVal;
 
-      float roseCenterX = width/2;
-      float roseCenterY = height/2;
+      float roseCenterX = this.width/2;
+      float roseCenterY = this.height/2;
 
       //float roseR = circleR;
 
@@ -182,7 +182,7 @@ public class LissajousDrawing extends DynamicGraphic
         this.ellipse(roseX, roseY, 4, 4);
       }
     }
-
+    this.endDraw();
   }
   // end class LissajousDrawing
 }
