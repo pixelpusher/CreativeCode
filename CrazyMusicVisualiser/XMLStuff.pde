@@ -174,7 +174,7 @@ void createConfigXML()
 
 boolean readConfigXML()
 {
-  println("READING XML CONFIG FROM: " + CONFIG_FILE_NAME);
+  //println("READING XML CONFIG FROM: " + CONFIG_FILE_NAME);
 
   BufferedReader reader = null;
 

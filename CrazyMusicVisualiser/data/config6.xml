@@ -9,7 +9,7 @@
         <vertex dx="500.0" dy="772.0" sx="500.0" sy="772.0"/>
       </vertices>
     </shape>
-    <shape media="tard2.png" mediaPath="/Users/eraskob/Documents/code/CreativeCode/CrazyMusicVisualiser/data/tard2.png" mediaType="image" name="shape9.7194918E8">
+    <shape media="tard2.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/tard2.png" mediaType="image" name="shape9.7194918E8">
       <vertices count="4">
         <vertex dx="534.0" dy="238.0" sx="0.0" sy="0.0"/>
         <vertex dx="1046.0" dy="238.0" sx="512.0" sy="0.0"/>
@@ -17,7 +17,7 @@
         <vertex dx="534.0" dy="772.0" sx="0.0" sy="512.0"/>
       </vertices>
     </shape>
-    <shape media="tard2.png" mediaPath="/Users/eraskob/Documents/code/CreativeCode/CrazyMusicVisualiser/data/tard2.png" mediaType="image" name="shape9.478295E8">
+    <shape media="tard2.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/tard2.png" mediaType="image" name="shape9.478295E8">
       <vertices count="4">
         <vertex dx="468.0" dy="238.0" sx="0.0" sy="0.0"/>
         <vertex dx="8.0" dy="242.0" sx="512.0" sy="0.0"/>
