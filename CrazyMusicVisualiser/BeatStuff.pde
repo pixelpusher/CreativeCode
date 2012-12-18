@@ -106,7 +106,9 @@ void tapTempo()
     PsychedelicWhitney pw  = (PsychedelicWhitney)(sourceDynamic.get( PsychedelicWhitney.NAME));
     for (int i=0; i<pw.intervalTime.length; i++)
     {
-      pw.intervalTime[i] = medianTime*int(random(8,32));
+      pw.intervalTime[i] = medianTime*int(random(32,128));
+      pw.setParticleColors();
+      pw.updateModelColors();
     }
 
     println("Median time:" + medianTime);
@@ -224,6 +226,10 @@ BeatMatcher matcher2 = new BeatMatcher( beats[2].getMaxBeats() );
           //println("next shape");
           nextBeatShape();
           beatShape.blendMode = BlendModes[int(random(0,BlendModes.length))];
+          PsychedelicWhitney pw  = (PsychedelicWhitney)(sourceDynamic.get( PsychedelicWhitney.NAME));
+          pw.setParticleColors();
+          pw.updateModelColors();
+
         }
    };
   

@@ -73,18 +73,14 @@ void setupWiiChuck()
   // clear the serial buffer:
   myPort.clear();
 
-
-
   // this prints out to console
   //chuck1.debug = true;
-
 
   chuck1.addListener( new IWiiChuckListener() {
     public void zPressed()
     {
-      println("Z!!! " + millis());
+      //println("Z!!! " + millis());
       tapTempo();
-      randomiseShapeColors();
     }
     public void cPressed()
     {
@@ -95,25 +91,15 @@ void setupWiiChuck()
     }
     public void stateUpdated(WiiChuck chuck) 
     {
-
-      /*
-  float nbrPoints;
-       float cx, cy;
-       float crad;
-       float cycleLength;
-       float startTime;
-       int   counter;
-       int numPetals;
-       float speed;
-       boolean usePoints;
-       */
       DynamicWhitney whitneyDynamicImage  = (DynamicWhitney)(sourceDynamic.get( DynamicWhitney.NAME));
 
-      whitneyDynamicImage.crad = lerp(whitneyDynamicImage.crad, whitneyDynamicImage.crad+map(chuck.ay, -100, 100, -8, 8f), 0.2);
-      whitneyDynamicImage.numPetals = int(map(abs(chuck.ax), 0, 100, 1, 4));
-
-      PsychedelicWhitney psychoWhitney  = (PsychedelicWhitney)(sourceDynamic.get( PsychedelicWhitney.NAME));
-      psychoWhitney.waveHeight = lerp(psychoWhitney.waveHeight, psychoWhitney.height/6f * map(chuck.stickY, -100, 100, 0.2, 1.5f), 0.3);
+      //whitneyDynamicImage.crad = lerp(whitneyDynamicImage.crad, whitneyDynamicImage.crad+map(chuck.ay, -100, 100, -8, 8f), 0.2);
+      //whitneyDynamicImage.numPetals = int(map(abs(chuck.ax), 0, 100, 1, 4));
+      if (chuck1.cPressed == 1)
+      {
+        PsychedelicWhitney psychoWhitney  = (PsychedelicWhitney)(sourceDynamic.get( PsychedelicWhitney.NAME));
+        psychoWhitney.waveHeight = lerp(psychoWhitney.waveHeight, psychoWhitney.height/6f * map(chuck.stickY, -100, 100, 0.2, 1.5f), 0.3);
+      }
       //psychoWhitney.speed = lerp(psychoWhitney.speed, 0.001f * map(chuck.stickX, -100, 100, -50, 50f), 0.2);
     }
   } 
