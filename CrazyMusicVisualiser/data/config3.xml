@@ -17,7 +17,7 @@
         <vertex dx="262.0" dy="382.0" sx="0.0" sy="1024.0"/>
       </vertices>
     </shape>
-    <shape media="boombox128.png" mediaPath="/Users/eraskob/Documents/code/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape3.48694912E8">
+    <shape media="boombox128.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape3.48694912E8">
       <vertices count="8">
         <vertex dx="42.0" dy="126.0" sx="2.0" sy="4.0"/>
         <vertex dx="208.0" dy="180.0" sx="56.0" sy="4.0"/>
@@ -29,7 +29,7 @@
         <vertex dx="48.0" dy="432.0" sx="2.0" sy="132.0"/>
       </vertices>
     </shape>
-    <shape media="adidasGold128.png" mediaPath="/Users/eraskob/Documents/code/CreativeCode/CrazyMusicVisualiser/data/adidasGold128.png" mediaType="image" name="shape1.09432269E9">
+    <shape media="adidasGold128.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/adidasGold128.png" mediaType="image" name="shape1.09432269E9">
       <vertices count="4">
         <vertex dx="88.0" dy="162.0" sx="0.0" sy="0.0"/>
         <vertex dx="88.0" dy="84.0" sx="64.0" sy="0.0"/>
@@ -37,7 +37,7 @@
         <vertex dx="472.0" dy="196.0" sx="0.0" sy="128.0"/>
       </vertices>
     </shape>
-    <shape media="boombox128.png" mediaPath="/Users/eraskob/Documents/code/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape9.783415E8">
+    <shape media="boombox128.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape9.783415E8">
       <vertices count="4">
         <vertex dx="92.0" dy="518.0" sx="0.0" sy="0.0"/>
         <vertex dx="82.0" dy="608.0" sx="1024.0" sy="0.0"/>
@@ -45,7 +45,7 @@
         <vertex dx="480.0" dy="336.0" sx="0.0" sy="1024.0"/>
       </vertices>
     </shape>
-    <shape media="boombox128.png" mediaPath="/Users/eraskob/Documents/code/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape1.56692646E9">
+    <shape media="boombox128.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape1.56692646E9">
       <vertices count="4">
         <vertex dx="508.0" dy="140.0" sx="0.0" sy="0.0"/>
         <vertex dx="890.0" dy="30.0" sx="1024.0" sy="0.0"/>
@@ -53,7 +53,7 @@
         <vertex dx="508.0" dy="240.0" sx="0.0" sy="1024.0"/>
       </vertices>
     </shape>
-    <shape media="boombox128.png" mediaPath="/Users/eraskob/Documents/code/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape1.58437107E9">
+    <shape media="boombox128.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/boombox128.png" mediaType="image" name="shape1.58437107E9">
       <vertices count="4">
         <vertex dx="514.0" dy="294.0" sx="0.0" sy="0.0"/>
         <vertex dx="858.0" dy="450.0" sx="1024.0" sy="0.0"/>
