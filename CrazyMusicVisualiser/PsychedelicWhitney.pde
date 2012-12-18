@@ -1,5 +1,8 @@
 
 import java.nio.FloatBuffer;
+import toxi.math.*;
+import toxi.color.*;
+import toxi.color.theory.*;
 
 //------------------------------------------------------------------
 // This draws a "Whitney" image
@@ -8,9 +11,11 @@ import java.nio.FloatBuffer;
 public class PsychedelicWhitney extends DynamicGraphic
 {
 
+  private ColorList particleColors;
 
   private GLModel glmodel;
   private GLTexture tex;
+  private float percentDone;
 
   // From ideas by John Whitney -- see his book "Digital Harmony"
 
@@ -49,6 +54,22 @@ public class PsychedelicWhitney extends DynamicGraphic
     //app.registerDraw(this);
   }
 
+
+  void setParticleColors()
+  {
+    TColor col = ColorRange.LIGHT.getColor();
+
+    //ArrayList<ColorTheoryStrategy> strategies = ColorTheoryRegistry.getRegisteredStrategies();
+    //for (Iterator<ColorTheoryStrategy> i=strategies.iterator(); i.hasNext();) {
+    //ColorTheoryStrategy s = i.next();
+    ColorTheoryStrategy s = new SplitComplementaryStrategy();
+    particleColors = ColorList.createUsingStrategy(s, col);
+
+    particleColors = new ColorRange(particleColors).addBrightnessRange(0.5, 1).getColors(null, numPoints, 0.01);
+
+    //    if (complement) list.complement();
+  }
+
   void initialize()
   {     
     waveHeight = this.height/6;
@@ -73,12 +94,12 @@ public class PsychedelicWhitney extends DynamicGraphic
 
     hueOffset = 56;
 
-    speedRatio = 1.1;
+    speedRatio = 0.1;
     cycleLength = 60000;
     numPoints = 160*2;
     blobSize = 20;
 
-    fadeAmount = 0.5;
+    fadeAmount = 0.65;
 
     // initialize points array
     pts = new PVector[MAX_POINTS];
@@ -87,10 +108,11 @@ public class PsychedelicWhitney extends DynamicGraphic
       pts[i] = new PVector();
 
     tex = new GLTexture(this.app, "kittpart.png");
-
+    setParticleColors();
     initModel();
+   
 
-    println(this.NAME + "initialized");
+    //println(this.NAME + "initialized");
   }
 
 
@@ -119,8 +141,10 @@ public class PsychedelicWhitney extends DynamicGraphic
 
     currentTime = (millis() - lastIntervalTime);
 
-//    if (currentTime > intervalTime[currentInterval]) 
-    if (currentTime > beats[currentBeatIndex].beatInterval*4) 
+    percentDone = currentTime / float( intervalTime[currentInterval]);
+
+    if (currentTime > intervalTime[currentInterval]) 
+      //    if (currentTime > beats[currentBeatIndex].beatInterval*4) 
     {
       currentInterval  = (currentInterval + 1) % intervalTime.length;
       lastIntervalTime = millis();
@@ -130,15 +154,15 @@ public class PsychedelicWhitney extends DynamicGraphic
       // if odd it's an interval time
       if (currentInterval % 2 == 0)
       {
-        //fadeAmount = 1-currentTime / float( intervalTime[currentInterval]);
-        fadeAmount = 1-currentTime / float( beats[currentBeatIndex].beatInterval*4);
-        
+        fadeAmount = 1-percentDone;
+        //fadeAmount = 1-currentTime / float( beats[currentBeatIndex].beatInterval*4);
+
         //println("currentTime=" + currentTime + " / " + fadeAmount);
       }
       else
         fadeAmount = 0f;
 
-    float s = sin(frameCount*speed);
+    float s = sin(percentDone*800*speed); // ARBITRARY NUMBER ALERT
 
     //float positiveSin = (1.0 + s) * 0.5; // from 0 - 1
     //  float varSpeed =  s*s * speed*speed + speed*speed;
@@ -219,10 +243,10 @@ public class PsychedelicWhitney extends DynamicGraphic
         float widthValue = 2*waveHeight*(1 + 
           cos(majorAngle));
 
-        float x = width/4 + waveHeight + waveHeight*(cos(l*PI)) + widthValue + (sin(angle)+1)*0.5*waveHeight;
+        float x = this.width/4 + waveHeight + waveHeight*(cos(l*PI)) + widthValue + (sin(angle)+1)*0.5*waveHeight;
         float y = waveHeight + waveHeight*(sin(l*PI)) + heightValue + (cos(angle)+1)*0.5*60;
 
-        if ((l % 2) == 0) x = width-x;
+        if ((l % 2) == 0) x = this.width-x;
 
         PVector v = pts[index+l*loopPoints];
 
@@ -243,7 +267,7 @@ public class PsychedelicWhitney extends DynamicGraphic
 
   void strategy2()
   {
-    this.glmodel.setSpriteSize(abs(sin(frameCount*0.01))*40+5, 800);
+    this.glmodel.setSpriteSize(sin(PI*percentDone)*20+8, 800);
 
     //    if (this.glmodel != null)
     //    {
@@ -288,7 +312,7 @@ public class PsychedelicWhitney extends DynamicGraphic
     if (true)
     {
       pushMatrix();
-      translate(width/2, height/2);
+      translate(this.width/2, this.height/2);
       rotate(HALF_PI);
 
       //translate(waveHeight/2, waveHeight/2);
@@ -310,7 +334,7 @@ public class PsychedelicWhitney extends DynamicGraphic
   void strategy3()
   {
     waveHeight = this.height/2;
-    this.glmodel.setSpriteSize(abs(sin(frameCount*0.01))*40+5, 400);
+    this.glmodel.setSpriteSize(sin(percentDone*PI)*20+8, 400);
     this.glmodel.setBlendMode(ADD);
     periods = 3;
 
@@ -336,7 +360,7 @@ public class PsychedelicWhitney extends DynamicGraphic
         sin( map(movedIndex, 0, numPoints, 0, periods*2*TWO_PI) ) 
         + dampedHeight;
 
-      heightValue *= abs(sin(frameCount*0.002)) * abs(sin(frameCount*0.002)) ;
+      heightValue *= sin(percentDone*PI*0.002) * sin(percentDone*PI*0.002);
 
       float nx = map(movedIndex, 0, numPoints, 0, this.width);
 
@@ -427,17 +451,22 @@ public class PsychedelicWhitney extends DynamicGraphic
 
 
 
-  void updateModelColors(float r, float g, float b, float a)
+  void updateModelColors()
   {     
     this.glmodel.beginUpdateColors();
 
     FloatBuffer cbuf = this.glmodel.colors;
 
     float col[] = { 
-      0.9, 0.0, 0.0, 0.8
+      0.9, 0.0, 0.0, 0.5
     };
 
+    Iterator<TColor> i = particleColors.iterator(); 
+    i.hasNext();
+
     for (int n = 0; n < this.glmodel.getSize(); ++n) {
+
+
 
       // get colors (debugging purposes)
       //cbuf.position(4 * n);
@@ -448,6 +477,15 @@ public class PsychedelicWhitney extends DynamicGraphic
 
 
       cbuf.position(4 * n);
+
+      if (!(i.hasNext()))
+      {
+        //wrap
+        i = particleColors.iterator();
+      }
+      TColor c = i.next();
+      c.toRGBAArray(col);
+      col[3] = 0.5;
       cbuf.put(col, 0, 4);
     }
 
@@ -489,9 +527,29 @@ public class PsychedelicWhitney extends DynamicGraphic
     FloatBuffer cbuf = this.glmodel.colors;
 
     float col[] = { 
-      1, 1, 1, 0.75
+      1, 1, 1, 0.5
     };
 
+    Iterator<TColor> i = particleColors.iterator(); 
+    i.hasNext();
+
+    for (int n = 0; n < this.glmodel.getSize(); ++n) {
+
+      cbuf.position(4 * n);
+
+      if (!(i.hasNext()))
+      {
+        //wrap
+        i = particleColors.iterator();
+      }
+      TColor c = i.next();
+      c.toRGBAArray(col);
+      col[3] = 0.65;
+
+      cbuf.put(col, 0, 4);
+    }
+
+/*
     for (int n = 0; n < this.glmodel.getSize(); ++n) 
     {
       int i = (n % 4);
@@ -512,7 +570,7 @@ public class PsychedelicWhitney extends DynamicGraphic
       cbuf.position(4 * n);
       cbuf.put(col, 0, 4);
     }
-
+*/
     cbuf.rewind();
     this.glmodel.endUpdateColors();
 
