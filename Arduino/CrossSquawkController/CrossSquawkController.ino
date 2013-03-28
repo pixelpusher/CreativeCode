@@ -7,16 +7,19 @@ ISR(WDT_vect) {
   Sleepy::watchdogEvent(); 
 }
 
+PortI2C myport (1 /*, PortI2C::KHZ400 */);
+DeviceI2C rtc (myport, 0x68);
+
 char payload[] = "tw"; // what we broadcast
 char sleepPayload[] = "sl"; // what we broadcast
-Port one (1);
+Port two (2);
 
 
 enum Mode { 
   SQUAWK, SLEEPING };  // all possible modes
 
 Mode mode = SLEEPING;
-
+byte now[6];
 
 
 void setup () {
@@ -30,7 +33,7 @@ void setup () {
   rf12_sleep(RF12_SLEEP);
   // wait another 2s for the power supply to settle
 
-  one.mode(INPUT);
+  two.mode(INPUT);
 
   Sleepy::loseSomeTime(2000);
 
@@ -41,6 +44,10 @@ void setup () {
 void loop () {
 
   blinkBlue(1);
+  getDate(now);
+  // yy mm dd hh mm ss
+
+
   Sleepy::loseSomeTime(1000);
 
   int millivolt = map(analogRead(6), 0, 1023, 0, 6600);
@@ -64,6 +71,11 @@ void loop () {
   }
 
 
+  // TODO
+  // use hours (24hr format) to test whether we should sleep or wake up!
+    // yy mm dd hh mm ss
+    
+
   if ( mode == SLEEPING )
   {
     rf12_sleep (-1); // wake up radio
@@ -80,20 +92,25 @@ void loop () {
       cleared = rf12_canSend();
     } 
 
+    blinkBlue(2);      
+    rf12_sendStart(0, sleepPayload, sizeof (sleepPayload));
+    delay(60);
+    Sleepy::loseSomeTime(SLEEPYTIME);
 
-    int state = one.digiRead();
+  }
+  else
+  {
 
-    if (state == HIGH)
-    {
-      blinkBlue(2);      
-      rf12_sendStart(0, sleepPayload, sizeof (sleepPayload));
-    }
-    else
-      blinkBlue(4);      
+    /*int state = two.digiRead();
+     
+     if (state == HIGH)
+     { }
+     */
+
+    blinkBlue(4);      
     rf12_sendStart(0, payload, sizeof (payload));
-  }      
-  delay(60);
-  Sleepy::loseSomeTime(SLEEPYTIME);
+
+  }
 }
 
 
@@ -107,4 +124,32 @@ void blinkBlue(byte times)
     PINB = bit(1); // toggles
   }
 }
+
+
+
+static void getDate (byte* buf) {
+  rtc.send();
+  rtc.write(0);	
+  rtc.stop();
+
+  rtc.receive();
+  buf[5] = bcd2bin(rtc.read(0));
+  buf[4] = bcd2bin(rtc.read(0));
+  buf[3] = bcd2bin(rtc.read(0));
+  rtc.read(0);
+  buf[2] = bcd2bin(rtc.read(0));
+  buf[1] = bcd2bin(rtc.read(0));
+  buf[0] = bcd2bin(rtc.read(1));
+  rtc.stop();
+}
+
+
+static byte bin2bcd (byte val) {
+  return val + 6 * (val / 10);
+}
+
+static byte bcd2bin (byte val) {
+  return val - 6 * (val >> 4);
+}
+
 
