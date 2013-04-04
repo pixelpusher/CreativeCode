@@ -1,6 +1,8 @@
 #include <JeeLib.h>
 
-#define SLEEPYTIME 2000  // how long to between sleep messages, in milliseconds
+#define DEBUG
+
+#define SLEEPYTIME 1500  // how long to between sleep messages, in milliseconds
 
 // boilerplate for low-power waiting
 ISR(WDT_vect) { 
@@ -16,7 +18,7 @@ Port two (2);
 
 
 enum Mode { 
-  SQUAWK, SLEEPING };  // all possible modes
+  SQUAWK, WAITING, SLEEPING };  // all possible modes
 
 Mode mode = SLEEPING;
 byte now[6];
@@ -26,6 +28,7 @@ void setup () {
 #ifdef DEBUG
   Serial.begin(57600);
   delay(100);
+  Serial.println("[starting Cross Squawk Controller]");
 #endif
 
   Sleepy::loseSomeTime(32);
@@ -36,28 +39,23 @@ void setup () {
   two.mode(INPUT);
 
   Sleepy::loseSomeTime(2000);
-
-
-
 }
 
 void loop () {
 
   blinkBlue(1);
-  getDate(now);
-  // yy mm dd hh mm ss
 
 
   Sleepy::loseSomeTime(1000);
 
   int millivolt = map(analogRead(6), 0, 1023, 0, 6600);
+  
 
 #ifdef DEBUG
+  delay(50);
   Serial.println(millivolt);    
   delay(50);
 #endif
-
-
 
   if (millivolt < 3400) // power is too low...
   {
@@ -70,46 +68,126 @@ void loop () {
     Sleepy::powerDown();
   }
 
+  getDate(now);
+  // yy mm dd hh mm ss
+
+#ifdef DEBUG
+  delay(50);
+  Serial.print("rtc:");
+  for (byte i = 0; i < 6; ++i) {
+    Serial.print(' ');
+    Serial.print((int) now[i]);
+  }
+  Serial.println();
+#endif
+
 
   // TODO
   // use hours (24hr format) to test whether we should sleep or wake up!
-    // yy mm dd hh mm ss
-    
+  // 0  1  2  3  4  5
+  // yy mm dd hh mm ss
+
+  if ( (now[3] < 8 && now[4] < 30)  || now[3] > 15) 
+  {
+    mode == SLEEPING;
+#ifdef DEBUG
+    delay(50);
+    Serial.println("SLEEP MODE");
+    Serial.print("rtc");
+    for (byte i = 0; i < 6; ++i) {
+      Serial.print(' ');
+      Serial.print((int) now[i]);
+    }
+    Serial.println();
+#endif
+  }
+  else if (now[3] == 8 && now[4] > 30)
+  {
+    mode == SQUAWK;
+  }
+  else
+    mode == WAITING;
+
+
 
   if ( mode == SLEEPING )
   {
     rf12_sleep (-1); // wake up radio
     delay(20);
-    rf12_recvDone(); // must call this to clear the buffer otherwise can't send!
 
-    boolean cleared = false;
-    unsigned int cnt = 0;
-
-    while (cnt < 5000 && !cleared)
+    for (int v=0; v<10; ++v)
     {
-      delay(1);
-      ++cnt;
-      cleared = rf12_canSend();
-    } 
+      delay(20);      
+      rf12_recvDone(); // must call this to clear the buffer otherwise can't send!
+      boolean cleared = false;
+      unsigned int cnt = 0;
 
-    blinkBlue(2);      
-    rf12_sendStart(0, sleepPayload, sizeof (sleepPayload));
-    delay(60);
-    Sleepy::loseSomeTime(SLEEPYTIME);
+      while (cnt < 5000 && !cleared)
+      {
+        delay(1);
+        ++cnt;
+        cleared = rf12_canSend();
+      } 
 
+      blinkBlue(2);
+      rf12_sendStart(0, sleepPayload, sizeof (sleepPayload));
+      delay(60);
+      Sleepy::loseSomeTime(SLEEPYTIME);
+    }
+
+
+#ifdef DEBUG
+    delay(50);
+    Serial.println("long sleep");
+#endif
+
+    Sleepy::loseSomeTime(6000);
   }
-  else
+  else if (mode == WAITING)
   {
-
     /*int state = two.digiRead();
      
      if (state == HIGH)
      { }
      */
+#ifdef DEBUG
+    delay(50);
+    Serial.println("sleeping for 30 minutes");
+    Serial.print("rtc");
+    for (byte i = 0; i < 6; ++i) {
+      Serial.print(' ');
+      Serial.print((int) now[i]);
+    }
+    Serial.println();
+#endif
 
-    blinkBlue(4);      
+    //sleep for 30 minutes
+    blinkBlue(4);
+    for (byte c=0; c<30; ++c)
+      Sleepy::loseSomeTime(100);
+
+    //    rf12_sendStart(0, payload, sizeof (payload));
+
+  }
+  else if (mode==SQUAWK)
+  {
+
+#ifdef DEBUG
+    delay(50);
+    Serial.println("squawking");
+    Serial.print("rtc");
+    for (byte i = 0; i < 6; ++i) {
+      Serial.print(' ');
+      Serial.print((int) now[i]);
+    }
+    Serial.println();
+#endif
+
+    //sleep for 30 minutes
+    blinkBlue(6);
+
     rf12_sendStart(0, payload, sizeof (payload));
-
+    Sleepy::loseSomeTime(2000);
   }
 }
 
@@ -151,5 +229,7 @@ static byte bin2bcd (byte val) {
 static byte bcd2bin (byte val) {
   return val - 6 * (val >> 4);
 }
+
+
 
 
