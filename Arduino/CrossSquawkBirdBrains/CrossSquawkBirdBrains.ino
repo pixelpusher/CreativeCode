@@ -17,7 +17,7 @@
 #include "Sounds.h"
 #include <JeeLib.h>
 
-const int ListenBaseTimeOut = 6000;
+const int ListenBaseTimeOut = 4000;
 
 #define AMP_PWR_PIN A3 // using the Mono Amp breakout board from Sparkfun which has on/off capability: https://www.sparkfun.com/products/11044
 //#define DEBUG 1
@@ -26,7 +26,7 @@ const int ListenBaseTimeOut = 6000;
 #ifdef DEBUG
 const int RandomTime = 1;
 #else
-const int RandomTime = 250;
+const int RandomTime = 500;
 #endif
 
 
@@ -34,9 +34,9 @@ const int RandomTime = 250;
   Port three (3);
 #endif
 
-const int SleepFactor = 3; // proportion of time to sleep for vs. listening (2 = double listen time)
+const int SleepFactor = 10; // proportion of time to sleep for vs. listening (2 = double listen time)
 const int speakerPin = 3;
-const byte SLEEP_MINUTES = 1; // whole minutes to sleep for when in sleep mode
+const byte SLEEP_MINUTES = 15; // whole minutes to sleep for when in sleep mode
 
 char payload[] = "tw"; // what we broadcast
 char sleepPayload[] = "sl"; // what we broadcast
@@ -153,7 +153,11 @@ void loop()
     }
     
     rf12_sleep (0); // in 32 * ms, so 32 seconds in this case
-    Sleepy::loseSomeTime((ListenBaseTimeOut + random (1, 9) * RandomTime)*SleepFactor);
+    Sleepy::loseSomeTime(ListenBaseTimeOut + random (1, 9) * RandomTime);
+    
+    Sleepy::loseSomeTime(ListenBaseTimeOut*SleepFactor);
+    Sleepy::loseSomeTime(ListenBaseTimeOut*SleepFactor);
+    
     delay(10); // settle
     rf12_sleep (-1); // wake up radio
     delay(10); // settle
@@ -161,7 +165,7 @@ void loop()
     mode = LISTEN; // listen for other birds
     listenStartTime = millis();
     //ListenTimeOut = ListenBaseTimeOut + random (1, 9) * 250; 
-    ListenTimeOut = ListenBaseTimeOut + random (1, 9) * RandomTime; 
+    ListenTimeOut = ListenBaseTimeOut; 
   }  
   else 
   {
@@ -180,8 +184,11 @@ void loop()
   
           int timeDiff = millis() - listenStartTime;
           // has time run out?
-          if ( timeDiff > ListenTimeOut ) 
-            startSquawking(); // start squawking again
+          if ( timeDiff > ListenTimeOut )
+          {
+            if ( mode != SLEEPING )
+              startSquawking(); // start squawking again
+          }
           else if (doneReceiving && (rf12_crc == 0)  ) 
           {
             byte state = matchPayload();
