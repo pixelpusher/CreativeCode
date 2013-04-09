@@ -38,8 +38,8 @@ const int SleepFactor = 10; // proportion of time to sleep for vs. listening (2 
 const int speakerPin = 3;
 const byte SLEEP_MINUTES = 15; // whole minutes to sleep for when in sleep mode
 
-char payload[] = "tw"; // what we broadcast
-char sleepPayload[] = "sl"; // what we broadcast
+const char payload[] = "tw"; // what we broadcast
+const char sleepPayload[] = "sl"; // what we broadcast
 
 const int PayloadLength = 2;
 char inPayload [PayloadLength];
@@ -156,7 +156,7 @@ void loop()
     Sleepy::loseSomeTime(ListenBaseTimeOut + random (1, 9) * RandomTime);
     
     Sleepy::loseSomeTime(ListenBaseTimeOut*SleepFactor);
-    Sleepy::loseSomeTime(ListenBaseTimeOut*SleepFactor);
+//    Sleepy::loseSomeTime(ListenBaseTimeOut*SleepFactor/2);
     
     delay(10); // settle
     rf12_sleep (-1); // wake up radio
