@@ -37,7 +37,7 @@ byte wakeTimeEndArray[] = {
   10, 15, 0};  // wake in morning
 
 byte sleepTimeArray[] = {
-  19, 0, 0}; // sleep at night
+  18, 30, 0}; // sleep at night
 int sleepTime=0;
 
 byte squawkTimeIntervalArray[] = {
@@ -355,6 +355,7 @@ static void getDate (byte* buf) {
   rtc.send();
   rtc.write(0);	
   rtc.stop();
+
 
   rtc.receive();
   buf[5] = bcd2bin(rtc.read(0));
