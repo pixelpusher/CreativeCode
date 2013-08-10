@@ -221,7 +221,7 @@ void setup()
 
   setupBeatStuff();
   // setup wii interface
-  setupWiiChuck();
+  //setupWiiChuck();
 
   setupBR();
 
