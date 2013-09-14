@@ -54,13 +54,13 @@ ColorPicker cpFill, cpStroke;
 
 
 color tintColors[] = {
-  color(0, 0, 250,180), color(0, 200, 0), color(200, 0, 0,180), color(255, 0, 255),
+  color(0, 0, 250,180), color(0, 200, 0), color(200, 0, 0,180), color(255, 0, 255), color(255, 255, 255,180),
 };
 
 
 final String bgImageSrcs[] = { "carstiled.png", "rose.png", "roseBW.png", "BOOMBOXbg.png" };
 final String spriteImages[] = { 
-  "blue-acrobats.png", "tv.png", "boombox1_64.png", "adidasGold.png", 
+  "blue-acrobats.png", "tv.png", "boombox1_64.png", "adidasGold.png", "bears.png", 
 };
 //"boombox128x64.png"
 //
@@ -70,8 +70,8 @@ GLTexture bgImages[], spriteTexs[];
 GLTexture currentBGTex;
 
 Flock[] flocks;
-final int FLOCKS = 4;
-int BOIDS = 100;
+final int FLOCKS = 5;
+int BOIDS = 80;
 
 
 // for attraction to objects:
@@ -184,7 +184,7 @@ void setup()
     // Add an initial set of boids into the system
     for (int ii = 0; ii < BOIDS; ++ii) 
     {
-      flocks[i].addBoid(new Boid(new PVector(width/2, height/2), boidMaxSpeed, boidMaxForce, spriteTexs[i]));
+      flocks[i].addBoid(new Boid(new PVector(width/2, height/2), spriteTexs[i]));
     }
     flocks[i].active = true;
   }
@@ -408,7 +408,8 @@ void draw()
   //translate( -p*width/2f ,0);
   //scale(2);
 
-
+  // just for fun
+  drawChuck(); 
 
   // DRAW BACKGROUND IMAGE
 

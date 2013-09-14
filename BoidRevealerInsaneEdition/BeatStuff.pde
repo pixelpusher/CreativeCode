@@ -10,6 +10,7 @@
 
 
 final int MAX_BEAT_INTERVAL = 2000;  // max time between beats in ms
+final int MIN_BEAT_INTERVAL = 50;
 
 int[] intervals = new int[3];
 int index = 0;
@@ -72,7 +73,7 @@ void updateBeatScene()
     beatsCounted = 0;
     beatsPerScene = int( random(1, 4)) * 4;
     currentBeatIndex =   newBeatIndex;
-    println("Changed beat:" + newBeatIndex);
+    //println("Changed beat:" + newBeatIndex);
   }
 }
 
@@ -89,9 +90,8 @@ void tapTempo()
   int timeInterval = currentTime - lastTime;
   lastTime = currentTime;
 
-  if (timeInterval < MAX_BEAT_INTERVAL)
+  if (timeInterval < MAX_BEAT_INTERVAL && timeInterval > MIN_BEAT_INTERVAL)
   {
-
     intervals[index] = timeInterval;
     index = (index + 1) % intervals.length;
     intervals = sort(intervals);
@@ -99,7 +99,7 @@ void tapTempo()
 
     for (int b=0; b<beats.length; b++)
       beats[b].setBeatInterval( medianTime );
-    println("Median time:" + medianTime);
+    //println("Median time:" + medianTime);
 
     for (DrawableNode fire : fireNodes)
     {
@@ -125,30 +125,28 @@ void setupBeatStuff()
   animModifiers = new LinkedList<IAnimationModifier>();
 
 
-  // start beat objects in motions
+  // start beat objects in motion
   for (int b=0; b<beats.length; b++)
   {
     beats[b] = new Beat(4);
-
+ /*
+ // possibly add global listeners to each, for global events
+ 
     beats[b].addListener( 
     new IBeatListener() 
     { 
       public void beatChanged(int beat)
       {
         updateBeatScene();
-        println("Beat changed:" + beat);
+        //println("Beat changed:" + beat);
       }
 
-      public void beatUpdated(float partialBeat) { 
-        /*
-       float beat = beats[currentBeatIndex].partialBeat/4f; // 1/4
-         // scale on a point
-         translate( -(1f-beat)*width/2f, 0);
-         scale( ((1f-beat)*3+1) );
-         */
+      public void beatUpdated(float partialBeat) 
+      { 
       }
     }
     );
+   */
   }
 
 
@@ -156,7 +154,7 @@ void setupBeatStuff()
   { 
     public void trigger() 
     { 
-      println("scalepoint");
+      //println("scalepoint");
       IAnimationModifier animod = new IAnimationModifier()
       { 
         int r = int(random(1, 3000000));
@@ -297,7 +295,7 @@ void setupBeatStuff()
       };
 
       neighbordist = 100f;
-      boidMaxSpeed = random(8, 16);
+//      boidMaxSpeed = random(8, 16);
       animod.start(beats[1].beatInterval*2);
       animModifiers.add( animod );
     }
@@ -328,12 +326,12 @@ void setupBeatStuff()
         public void update(int t)
         {
           super.update(t);
-          boidMaxSpeed = 8f+30f*sin(PI*(1f-percentFinished));
+          //boidMaxSpeed = 8f+30f*sin(PI*(1f-percentFinished));
         }
       };
 
       neighbordist = 100f;
-      boidMaxSpeed = random(8, 16);
+//      boidMaxSpeed = random(8, 16);
       animod.start(beats[2].beatInterval*4);
       animModifiers.add( animod );
     }

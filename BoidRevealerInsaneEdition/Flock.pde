@@ -51,14 +51,19 @@ class Flock
           b.alive = false;
         else
         {
-          b.maxforce = maxforce;
+          //b.maxforce = maxforce;
           PVector sep = separate(b, boids);   // Separation
+          sep.z = maxforce;
           PVector ali = align(b, boids);      // Alignment
+          ali.z = maxforce; //FIXME
           //PVector coh = cohesion(b, boids);   // Cohesion
           // Arbitrarily weight these forces
           sep.mult(1.0);
           ali.mult(0.6);
           //coh.mult(0.2);
+          
+          sep.z = maxforce;
+          ali.z = maxforce; //FIXME
 
           // Add the force vectors to acceleration
           b.accelerate( sep );
@@ -135,7 +140,7 @@ class Flock
     if (dBot > EPSILON)
       sumAccelY -= (1f/dBot)*avoidWallsFactor;
 
-    b.accelerate(sumAccelX, sumAccelY);
+    b.accelerate(sumAccelX, sumAccelY, maxforce);
 
     // attraction towards "characters"
 
@@ -158,7 +163,7 @@ class Flock
         float cX = dirX*dInv;
         float cY = dirY*dInv;
 
-        b.accelerate(cX, cY);
+        b.accelerate(cX, cY, maxforce);
       }
     }
 

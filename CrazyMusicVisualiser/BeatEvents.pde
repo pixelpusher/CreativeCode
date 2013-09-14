@@ -8,7 +8,7 @@ class FilenameProbability
   FilenameProbability(String s, float p)
   {
     name = s;
-    p = prob;
+    prob = p;
   }
 }
 
@@ -48,7 +48,8 @@ class ConfigFileChangeEvent implements IBeatEvent
     for ( FilenameProbability f : configFileNames)
     {
       currentProb += f.prob;
-      if (currentProb < r)
+      //println("r:" + r + " currentp " + currentProb);
+      if (currentProb > r)
       {
         //println(f.name);
         if (!(CONFIG_FILE_NAME.equals( f.name )) )

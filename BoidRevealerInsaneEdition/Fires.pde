@@ -35,7 +35,7 @@ void setupFires(PGraphics renderer)
     fireNodes = new LinkedList<DrawableNode>();
   }
 
-  PImage fireImg = loadImage("fire128.png");
+  PImage fireImg = loadImage("skullhand128.png");
 
   // loop through and make new brick objects and add to bricks list
   for (int i=0; i<numberOfFires; i++)

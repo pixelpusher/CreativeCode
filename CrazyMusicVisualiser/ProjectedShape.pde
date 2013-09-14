@@ -10,20 +10,20 @@
 class ProjectedShape
 {
   PImage srcImage = null;
-  
+
   // for tinting:
   int r;
   int g;
   int b;
   int a;
-  int blendMode = LIGHTEST;
+  int blendMode = BLEND;
 
   // for outlining:
-  color srcColor = color(0, 255, 0, 180);
-  color dstColor = color(255, 0, 255, 180);
-  
+  color srcColor = color(255, 255);
+  color dstColor = color(255, 255);
+
   String name = null;
-  
+
   LinkedList<ProjectedShapeVertex> verts = null; // list of points in the image (PVectors)
 
   ProjectedShape(PImage img)
@@ -33,33 +33,33 @@ class ProjectedShape
     else
       println("ERROR::::IMAGE FOR PROJECTED SHAPE CANNOT BE NULL!!");
     verts    = new LinkedList<ProjectedShapeVertex>();
-    
+
     // give it a random name
-    name = "shape" + random(0,MAX_INT);
+    name = "shape" + random(0, MAX_INT);
   }
-  
-  
+
+
   // deep copy ProjectedShape
-  
+
   ProjectedShape(ProjectedShape srcShape)
   {
     if (srcShape.srcImage != null)
       srcImage = srcShape.srcImage;
     else
       println("ERROR::::IMAGE FOR PROJECTED SHAPE CANNOT BE NULL!!");
-    
+
     // deep copy verts
     verts    = new LinkedList<ProjectedShapeVertex>();
-    
+
     for (ProjectedShapeVertex psvert : srcShape.verts )
     {
-     verts.add(new ProjectedShapeVertex(psvert) );
+      verts.add(new ProjectedShapeVertex(psvert) );
     }
-    
+
     // give it a random name
-    name = "shape" + random(0,MAX_INT);
+    name = "shape" + random(0, MAX_INT);
   }
-  
+
 
 
   // Add a new source and destination vertex
@@ -85,11 +85,11 @@ class ProjectedShape
   void clear()
   {
     srcImage = null;
-    
+
     clearVerts();
   }
 
-void clearVerts()
+  void clearVerts()
   {    
     for (ProjectedShapeVertex v : verts)
       v.clear();
@@ -160,48 +160,82 @@ void clearVerts()
   }
 
 
+
+  PVector createNewShapeVertexFromSourcePoint( PVector vert1src, PVector vert2src, PVector vert1dest, PVector vert2dest, PVector newPoint)
+  {
+    // add a new point between the current and previous vertices
+    // make it proportional to the destination shape based on the distance between verts
+    // in the source shape
+
+    // calc standardized distance between new point and previous point 
+    // could get direction from currentVert & prevVert, normalize, and then use magnitude of x,y - currentVert?
+
+    // total distance between src points            
+    float diffSrcMag = PVector.sub(vert1src, vert2src).mag();
+
+    // how far along are we?
+    PVector diffNewSrc = PVector.sub(newPoint, vert1src);
+    float diffNewSrcMag = diffNewSrc.mag() / diffSrcMag;
+    // DEBUG
+    //println("percent diff:" + diffNewSrcMag);
+
+    // in what direction?
+    // source direction: PVector dirNewSrc = new PVector(diffNewSrc.x, diffNewSrc.y, diffNewSrc.z);
+    // dest direction:
+    PVector dirNewSrc = PVector.sub(vert2dest, vert1dest);
+    dirNewSrc.normalize();
+
+    float diffDest = PVector.sub(vert2dest, vert1dest).mag();
+
+    PVector pvecDest = PVector.mult(dirNewSrc, diffNewSrcMag);
+    pvecDest.mult(diffDest);
+    pvecDest.add( vert1dest );
+    /* DEBUG       
+     println("adding point at:");
+     println(pvecSource);
+     println(pvecDest);
+     */
+    return pvecDest;
+  }
+
+
+  /*
+   * Attempt to add a new projected shape vertex to this shape, if the point (x,y) given
+   * is less than the maximum distance, e.g. "distanceSquared"
+   *
+   */
   ProjectedShapeVertex addClosestSourcePointToLine( float x, float y, float distanceSquared)
   {
-    // this represents the one we've found
+    // this represents the one we're going to add (if any)
     ProjectedShapeVertex result = null;
 
-    // draw the shape using source and destination vertices
+    // sanity check, are there are currently any vertices stored in this shape?
     if (verts != null && verts.size() > 1)
     {
-      PVector ps = new PVector (x, y);
-      PVector pd = new PVector (x, y);
+      PVector pvecSource = new PVector (x, y);
+      PVector pvecDest = new PVector (x, y);
 
       ListIterator<ProjectedShapeVertex> iter = verts.listIterator();
+      ProjectedShapeVertex currentVert = iter.next();
+      ProjectedShapeVertex prevVert = currentVert;
 
-      int i=0;
-
-      ProjectedShapeVertex vert1 = iter.next();
-      ProjectedShapeVertex vert2 = vert1;
-
+      // go through the list of vertices one by one and see if the distance between the point x,y, and line
+      // made by successive vertices is less than the maximum distance distanceSquared
       while (iter.hasNext () && result == null)
       {
-        //println("iter:" + iter.nextIndex() + "["+ i++ +"]" + " / " + verts.size());
-        //print (" vert1 " + vert1 + "::: ");
-
         // make sure we're not at the last element
         if (iter.hasNext() )
         {
-          vert1 = vert2;
+          prevVert = currentVert;
+          currentVert = iter.next();
 
-          vert2 = iter.next();
-
-          //println(" vert2 " + vert2);
-
-          float d = distancePointToLine(vert1.src, vert2.src, ps);
-
-          //println("d:" + d);
+          float d = distancePointToLine(currentVert.src, prevVert.src, pvecSource);
 
           if ( d < distanceSquared)
           {
-            //println("add a point["+ iter.previousIndex() +"] " + ps.x + "," + ps.y);
-            // add a new point!
-            iter.previous();
-            result = new ProjectedShapeVertex(ps, pd); 
+            iter.previous();         
+            PVector newVert = createNewShapeVertexFromSourcePoint(prevVert.src, currentVert.src, prevVert.dest, currentVert.dest, pvecSource);
+            result = new ProjectedShapeVertex(pvecSource, newVert);
             iter.add( result );
           }
         }
@@ -210,17 +244,18 @@ void clearVerts()
       if (result == null)
       {
         // now check last and 1st
-        vert2 = verts.peekLast();
-        vert1 = verts.peekFirst();
+        currentVert = verts.peekLast();
+        prevVert = verts.peekFirst();
 
-        float d = distancePointToLine(vert1.src, vert2.src, ps);
+        float d = distancePointToLine(currentVert.src, prevVert.src, pvecSource);
 
         //println("d:" + d);
 
         if ( d < distanceSquared)
         {
           // add a new point!
-          result = new ProjectedShapeVertex(ps, pd); 
+          PVector newVert = createNewShapeVertexFromSourcePoint(prevVert.src, currentVert.src, prevVert.dest, currentVert.dest, pvecSource);
+          result = new ProjectedShapeVertex(pvecSource, newVert);
           verts.addLast( result );
         }
       }
@@ -234,46 +269,37 @@ void clearVerts()
 
   ProjectedShapeVertex addClosestDestPointToLine( float x, float y, float distance)
   {
-    // this represents the one we've found
+    // this represents the one we're going to add (if any)
     ProjectedShapeVertex result = null;
 
-    // draw the shape using source and destination vertices
+    // sanity check, are there are currently any vertices stored in this shape?
     if (verts != null && verts.size() > 1)
     {
-      PVector ps = new PVector (x, y);
-      PVector pd = new PVector (x, y);
+      PVector pvecSource = new PVector (x, y);
+      PVector pvecDest = new PVector (x, y);
 
       ListIterator<ProjectedShapeVertex> iter = verts.listIterator();
+      ProjectedShapeVertex currentVert = iter.next();
+      ProjectedShapeVertex prevVert = currentVert;
 
-      int i=0;
-
-      ProjectedShapeVertex vert1 = iter.next();
-      ProjectedShapeVertex vert2 = vert1;
-
+      // go through the list of vertices one by one and see if the distance between the point x,y, and line
+      // made by successive vertices is less than the maximum distance distanceSquared
       while (iter.hasNext () && result == null)
       {
-        //println("iter:" + iter.nextIndex() + "["+ i++ +"]" + " / " + verts.size());
-        //print (" vert1 " + vert1 + "::: ");
-
         // make sure we're not at the last element
         if (iter.hasNext() )
         {
-          vert1 = vert2;
+          prevVert = currentVert;
+          currentVert = iter.next();
 
-          vert2 = iter.next();
+          float d = distancePointToLine(currentVert.dest, prevVert.dest, pvecDest);
 
-          //println(" vert2 " + vert2);
-
-          float d = distancePointToLine(vert1.dest, vert2.dest, ps);
-
-          //println("d:" + d);
-
-          if ( d < distance)
+          if ( d < distanceSquared)
           {
-            //println("add a point["+ iter.previousIndex() +"] " + p.x + "," + p.y);
-            // add a new point!
-            iter.previous();
-            result = new ProjectedShapeVertex(ps, pd); 
+            iter.previous();         
+            PVector newVert = createNewShapeVertexFromSourcePoint(prevVert.dest, currentVert.dest, prevVert.src, currentVert.src, pvecDest);
+            result = new ProjectedShapeVertex(newVert, pvecDest);
+
             iter.add( result );
           }
         }
@@ -282,25 +308,26 @@ void clearVerts()
       if (result == null)
       {
         // now check last and 1st
-        vert2 = verts.peekLast();
-        vert1 = verts.peekFirst();
+        currentVert = verts.peekLast();
+        prevVert = verts.peekFirst();
 
-        float d = distancePointToLine(vert1.dest, vert2.dest, ps);
+        float d = distancePointToLine(currentVert.dest, prevVert.dest, pvecDest);
 
-        println("d:" + d + " / " + distance);
+        //println("d:" + d);
 
-        if ( d < distance)
+        if ( d < distanceSquared)
         {
           // add a new point!
-          result = new ProjectedShapeVertex(ps, pd); 
+          PVector newVert = createNewShapeVertexFromSourcePoint(prevVert.dest, currentVert.dest, prevVert.src, currentVert.src, pvecDest);
+          result = new ProjectedShapeVertex(newVert, pvecDest);
           verts.addLast( result );
-          println("added new pt");
         }
       }
     }
 
     return result;
   }
+
 
 
 

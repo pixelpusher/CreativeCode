@@ -45,11 +45,11 @@ void loop() {
   Serial.print(",");  
   Serial.print(chuck.readJoyY()); 
   Serial.print(",");
- // Serial.print(chuck.zPressed() ? 1 : 0 ); 
- Serial.print(chuck.buttonZ);
+  Serial.print(chuck.zPressed() ? 1 : 0 ); 
+ //Serial.print(chuck.buttonZ);
   Serial.print(",");
-  //Serial.print(chuck.cPressed() ? 1 : 0 ); 
- Serial.print(chuck.buttonC);
+  Serial.print(chuck.cPressed() ? 1 : 0 ); 
+ //Serial.print(chuck.buttonC);
   Serial.println();
 
 }

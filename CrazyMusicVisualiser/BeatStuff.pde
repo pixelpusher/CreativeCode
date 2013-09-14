@@ -147,11 +147,11 @@ void setupBeatStuff()
 
   laterConfigFileChangeEvent = new ConfigFileChangeEvent();
 
-  laterConfigFileChangeEvent.add( "data/config6.xml", 0.1);
-  laterConfigFileChangeEvent.add( "data/config7.xml", 0.1);
+  laterConfigFileChangeEvent.add( "data/config6.xml", 0.2);
+  laterConfigFileChangeEvent.add( "data/config7.xml", 0.8);
   laterConfigFileChangeEvent.add( "data/config2.xml", 0.2);
-  laterConfigFileChangeEvent.add( "data/config3.xml", 0.4);
-  laterConfigFileChangeEvent.add( "data/config4.xml", 0.5);
+  laterConfigFileChangeEvent.add( "data/config3.xml", 0.2);
+  laterConfigFileChangeEvent.add( "data/config4.xml", 0.1);
 
 
   kitPart = new GLTexture(this, "kittpart.png");
@@ -216,6 +216,7 @@ void setupBeatStuff()
   matcher0.addBeatEvent(0, triggerGlowFader);
   matcher0.addBeatEvent(2, changeWhitneyPetalsBeatEvent);
   matcher0.addBeatEvent(2, moveLeft);
+  matcher0.addBeatEvent(3, configFileChangeEvent );
   matcher0.addBeatEvent(3, changeConfigEvent );
   matcher0.addBeatEvent(3, triggerBeatFader);
 

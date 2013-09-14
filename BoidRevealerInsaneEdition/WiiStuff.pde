@@ -26,7 +26,6 @@ void setupWiiChuck()
   myPort.clear();
 
 
-
   // this prints out to console
   //chuck1.debug = true;
 
@@ -34,14 +33,42 @@ void setupWiiChuck()
   chuck1.addListener( new IWiiChuckListener() {
     public void zPressed()
     {
-      println("Z!!! " + millis());
+      //println("Z!!! " + millis());
       tapTempo();
     }
     public void cPressed()
     {
-      println("C!!!" + millis());
+       currentBGTex = bgImages[floor(random(0,bgImages.length))];
+       colorMode(HSB);
+       tintColors[floor(random(0,tintColors.length))] = color(random(0,256), 255, 220, 180);
     }
     public void stateUpdated(WiiChuck chuck) {
+//      println("roll:"+chuck.roll);
+      int val = (int)constrain(map(abs(chuck.roll), 0, 1.3, 0, FLOCKS+1),0,FLOCKS); 
+      if (val > 0)
+      {
+        //println("animating:"+val);
+        flocks[val-1].toReanimate++;
+      }
+      //println("x:"+chuck.stickX);
+      final float maxh = 2*83*83;
+      float h2 = chuck.stickY*chuck.stickY + chuck.stickX*chuck.stickX;
+      //println(h2/maxh);
+      if (h2 > maxh/6f)
+      {
+        float speed  = map(h2, maxh/6f, maxh, 2,280);
+        //speed *= speed; 
+        //println("speed:"+speed);
+        boidMaxSpeed = speed;
+        boidMaxForce = speed/5f;
+        
+        for (Flock f : flocks)
+        {
+          
+          f.maxspeed = speed;
+          fx = speed/100f;
+        }
+      }
     }
   } 
   );
@@ -52,14 +79,13 @@ void setupWiiChuck()
 
 void drawChuck() 
 { 
-
+  pushMatrix();
   rotateZ(chuck1.roll); 
   rotateX(chuck1.pitch); 
   scale(map(chuck1.stickY, -100, 100, 10, 60));
 
   float fx = map(chuck1.stickX, -100, 100, 0, 1);
 
-  pushMatrix();
   beginShape(QUADS);
 
   fill(0, fx, fx); 
