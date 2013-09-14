@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config updated="2013.9.14-14:30:19" version="1.0">
+  <shapes>
+    <shape media="7sac9xt9.bmp" mediaPath="7sac9xt9.bmp" mediaType="image" name="shape1.46525376E9">
+      <vertices count="4">
+        <vertex dx="196.0" dy="208.0" sx="0.0" sy="0.0"/>
+        <vertex dx="436.0" dy="208.0" sx="240.0" sy="0.0"/>
+        <vertex dx="436.0" dy="388.0" sx="240.0" sy="180.0"/>
+        <vertex dx="196.0" dy="388.0" sx="0.0" sy="180.0"/>
+      </vertices>
+    </shape>
+  </shapes>
+</config>
