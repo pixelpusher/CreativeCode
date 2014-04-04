@@ -14,7 +14,7 @@
 /// * for one-shot use, call "led.set(123)" and poll as "if (led.blink())"
 
 
-byte LEDBlinker::blink(word ms) {
+byte LEDBlinker::blink(uint16_t ms) {
     byte ready = 0;
     if (armed) {
         word remain = next - millis();
