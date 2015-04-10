@@ -27,14 +27,14 @@
 || Wiring:
 || GND -----/ ------ pin 8
 */
-Button button = Button(8,BUTTON_PULLUP);
+Button button = Button(8,BUTTON_PULLUP_INTERNAL);
 
 void setup(){
   pinMode(13,OUTPUT);              //debug to led 13
   button.pressHandler(ledOn);      // function to run when button is pressed
   button.releaseHandler(ledOff);   // function to run when button is released
 }
-
+   
 
 void loop()
 {
@@ -43,6 +43,8 @@ void loop()
   button.isPressed();
 }
 
+
+// callbacks for the button (automatically set in button.pressHandler and button.releaseHandler )
 
 void ledOn(Button &b)
 {

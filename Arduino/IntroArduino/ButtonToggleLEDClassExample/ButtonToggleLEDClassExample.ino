@@ -1,22 +1,20 @@
 /*
 ||
- || @file ButtonExample.pde
- || @version 1.2
- || @author Alexander Brevig
- || @contact alexanderbrevig@gmail.com
- || @contribution Evan Raskob - http://pixelist.info - e.raskob@rave.ac.uk 
+ || @file ButtonToggleLEDClassExample.pde
+ || @version 1.0
+ || @author Evan Raskob
+ || @contact http://pixelist.info - e.raskob@rave.ac.uk 
  ||
  || @description
- || | Modified callback version of Button class.  Lights an LED connected
- || | to pin 13 when a button connected to pin 8 is pressed.
- || | Uses Tom Igoe's port of Button: 
- 
+ || | Modified callback version of Button to run an "animation" function each loop.
+ || | Toggles a blinking LED connected to pin 13 when a
+ || | button connected to pin 8 is clicked.
+ || | Uses Tom Igoe's port of Button.
  || #
  ||
  || @license
- || | Copyright (c) 2009 Alexander Brevig. All rights reserved.
- || | This code is subject to AlphaLicence.txt
- || | alphabeta.alexanderbrevig.com/AlphaLicense.txt
+ || | Copyright (c) 2015 Evan Raskob. All rights reserved.
+ || | This code is in the public domain.
  || #
  ||
  */
@@ -28,7 +26,7 @@
 // utility functions & vars for setting/stopping animations
 //
 typedef void (*animation_t)(void); // animation callback - make the code more readable
-animation_t animation;  // need this to run code each loop()
+animation_t animation = 0;  // need this to run code each loop()
 
 void setAnimation( animation_t ani_func );
 void stopAnimation();
@@ -52,17 +50,11 @@ LEDBlinker led1(13); // led blink object on pin 13
 
 void setup()
 {
-  pinMode(12,OUTPUT);              //debug to led 13
+  pinMode(12,OUTPUT);              //debug to led 12
   digitalWrite(12,LOW);            // turn it off to start
 
-  //button.clickHandler(ledOff);      // function to run when button is pressed
-  //button.holdHandler(setLEDBlinkAnimation,1000);   // function to run when button is released
-
-  //button.pressHandler(setLEDBlinkAnimation);
-  //button.releaseHandler(ledOff);   // function to run when button is released
-  button.releaseHandler(setLEDBlinkAnimation);
-
-  animation = 0; // start as 0 (none)
+  // function to run when button is pressed and released
+  button.clickHandler(setLEDBlinkAnimation);
 }
 
 
@@ -82,21 +74,21 @@ void loop()
 void setLEDBlinkAnimation(Button &b)
 {
   if (led1.idle())
-  {  
-    led1.set(0);    // reset the timer first - very important!
-    //setAnimation(ledBlink);
+  { 
     digitalWrite(12,HIGH);
     delay(100);
     digitalWrite(12,LOW);
-    //Animation = ledBlink;
+     
+    led1.set(0);    // reset the timer first - very important! 
     led1.on();
     setAnimation(ledBlink);
   }
   else
   {
     stopAnimation();
-    led1.set(0);
-    led1.off();
+    led1.stop();
+    
+    // blink status light longer to show we've stopped
     digitalWrite(12,HIGH);
     delay(400);
     digitalWrite(12,LOW);
@@ -108,13 +100,19 @@ void setLEDBlinkAnimation(Button &b)
 void ledBlink()
 {
   led1.blink(250); // set this one to blink every 250ms
+
+  // stop after 3 blinks
+  if (led1.getBlinks() > 3) {  
+    stopAnimation();
+    led1.stop();
+  }
 }
 
 
 void ledOff(Button &b)
 {
   stopAnimation();
-  led1.off();
+  led1.stop();
 }
 
 
