@@ -1,20 +1,19 @@
 /*
 ||
- || @file ButtonExample.pde
- || @version 1.2
- || @author Alexander Brevig
- || @contact alexanderbrevig@gmail.com
- || @contribution Evan Raskob - http://pixelist.info - e.raskob@rave.ac.uk 
+ || @file ButtonClickLEDClassExample.pde
+ || @version 1.1
+ || @author Evan Raskob
+ || @contact  - http://pixelist.info - e.raskob@rave.ac.uk 
  ||
  || @description
- || | Modified callback version of Button class.  Lights an LED connected
- || | to pin 13 when a button connected to pin 8 is pressed.
- || | Uses Tom Igoe's port of Button: 
+ || | Modified callback version of Button class.  Blinks an LED connected
+ || | to pin 13 when a button connected to pin 8 is pressed, stops on release.
+ || | Uses Tom Igoe's port of Button. 
  
  || #
  ||
  || @license
- || | Copyright (c) 2009 Alexander Brevig. All rights reserved.
+ || | Copyright (c) 2015 Evan Raskob. All rights reserved.
  || | This code is subject to AlphaLicence.txt
  || | alphabeta.alexanderbrevig.com/AlphaLicense.txt
  || #
@@ -52,16 +51,15 @@ LEDBlinker led1(13); // led blink object on pin 13
 
 void setup()
 {
-  pinMode(12,OUTPUT);              //debug to led 13
+  pinMode(12,OUTPUT);              //debug to led 12
   digitalWrite(12,LOW);            // turn it off to start
 
   //button.clickHandler(ledOff);      // function to run when button is pressed
   //button.holdHandler(setLEDBlinkAnimation,1000);   // function to run when button is released
 
-  //button.pressHandler(setLEDBlinkAnimation);
-  //button.releaseHandler(ledOff);   // function to run when button is released
-  button.releaseHandler(setLEDBlinkAnimation);
-
+  button.pressHandler(setLEDBlinkAnimation);
+  button.releaseHandler(ledOff);   // function to run when button is released
+  
   animation = 0; // start as 0 (none)
 }
 
@@ -83,12 +81,11 @@ void setLEDBlinkAnimation(Button &b)
 {
   if (led1.idle())
   {  
-    led1.set(0);    // reset the timer first - very important!
-    //setAnimation(ledBlink);
     digitalWrite(12,HIGH);
     delay(100);
     digitalWrite(12,LOW);
-    //Animation = ledBlink;
+    
+    led1.set(0);    // reset the timer first - very important!
     led1.on();
     setAnimation(ledBlink);
   }
