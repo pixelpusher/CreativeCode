@@ -72,8 +72,8 @@ void LEDBlinker::set(word ms) {
       blinks = 0;
 }
 
+// stop blinking
 void LEDBlinker::stop()
 {
   set(0);
-  off();
 }

@@ -9,7 +9,6 @@
  || | Modified callback version of Button class.  Blinks an LED connected
  || | to pin 13 when a button connected to pin 8 is pressed, stops on release.
  || | Uses Tom Igoe's port of Button. 
- 
  || #
  ||
  || @license
@@ -19,6 +18,9 @@
  || #
  ||
  */
+ 
+ // TODO: add queue to hold/test/activate buttons and add addButton() and
+ // removeButton() functions
 
 #include <Button.h>
 #include "LEDBlinker.h";
@@ -27,13 +29,12 @@
 // utility functions & vars for setting/stopping animations
 //
 typedef void (*animation_t)(void); // animation callback - make the code more readable
-animation_t animation;  // need this to run code each loop()
+animation_t animation;  // need this function to run code each loop()
 
 void setAnimation( animation_t ani_func );
 void stopAnimation();
 void runAnimation();
 // end utility funcs
-
 
 
 //create a Button object at pin 8
@@ -42,23 +43,33 @@ void runAnimation();
  || GND -----/ ------ pin 8
  */
 Button button(8,BUTTON_PULLUP_INTERNAL);
-
-// for more buttons, copy the above code...
+// for more buttons, copy the above code and rename to button2, etc.
 
 LEDBlinker led1(13); // led blink object on pin 13
 
+const int DEBUG_PIN = DEBUG_PIN; // status light for when something happens
+
+int blinkRate = 250; // ms LED is on and off for
+
+void blinkDebugLED(int time);  // blink the debug LED
+
+void ledOff();
+void ledBlink();
+
+void setButtonPressAnimation(Button &b)
+void setButtonReleaseAnimation(Button &b);
 
 
 void setup()
 {
-  pinMode(12,OUTPUT);              //debug to led 12
-  digitalWrite(12,LOW);            // turn it off to start
+  pinMode(DEBUG_PIN,OUTPUT);              //debug to led DEBUG_PIN
+  digitalWrite(DEBUG_PIN,LOW);            // turn it off to start
 
   //button.clickHandler(ledOff);      // function to run when button is pressed
   //button.holdHandler(setLEDBlinkAnimation,1000);   // function to run when button is released
 
-  button.pressHandler(setLEDBlinkAnimation);
-  button.releaseHandler(ledOff);   // function to run when button is released
+  button.pressHandler(setButtonPressAnimation);
+  button.releaseHandler(setButtonReleaseAnimation);   // function to run when button is released
   
   animation = 0; // start as 0 (none)
 }
@@ -77,41 +88,54 @@ void loop()
 
 
 
-void setLEDBlinkAnimation(Button &b)
+///////////////////////////////////////////////////////
+// Functions for button callbacks
+///////////////////////////////////////////////////////
+
+void setButtonPressAnimation(Button &b)
 {
   if (led1.idle())
   {  
-    digitalWrite(12,HIGH);
-    delay(100);
-    digitalWrite(12,LOW);
+    blinkDebugLED(100);
     
-    led1.set(0);    // reset the timer first - very important!
+    led1.stop();    // reset the timer first - very important!
     led1.on();
     setAnimation(ledBlink);
   }
   else
   {
-    stopAnimation();
-    led1.set(0);
     led1.off();
-    digitalWrite(12,HIGH);
-    delay(400);
-    digitalWrite(12,LOW);
   }
-
 }
 
+
+void setButtonReleaseAnimation(Button &b)
+{
+  setAnimation(ledOff);
+}
 
 void ledBlink()
 {
-  led1.blink(250); // set this one to blink every 250ms
+  led1.blink(blinkRate); // set this one to blink every 250ms
+}
+
+void ledOff()
+{
+  stopAnimation();
+  led1.stop(); // stop blinking and turn off
+  led1.off();
 }
 
 
-void ledOff(Button &b)
+//
+// utility function to blink an LED
+//
+void blinkDebugLED(int time)
 {
-  stopAnimation();
-  led1.off();
+    digitalWrite(DEBUG_PIN,HIGH);
+    delay(time);
+    digitalWrite(DEBUG_PIN,LOW);
+    delay(time);
 }
 
 
