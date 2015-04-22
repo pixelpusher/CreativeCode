@@ -16,12 +16,15 @@
 // example for more information on possible values.
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-HSVColori myColor(100,255,200); // h,s,v
+HSVColori myColor(100,255,100); // h,s,v
+
+int inc  = 2;
+
 
 
 void setup() {
 
-Serial.begin(9600);
+  Serial.begin(9600);
 
   myColor.h = 0; //red
 
@@ -48,29 +51,82 @@ void loop() {
     Serial.print("received byte:");
     Serial.println((char)inByte);
 
-    char received = (char)inByte;
+    char received = (char) inByte;
 
-    if ( received == 'h')
+    switch( received )
     {
-      myColor.shiftHue(4);
+
+    case 'h': 
+      {
+        myColor.shiftHue(inc);
+      }
+      break;
+
+    case 'H':
+      {
+        myColor.shiftHue(-inc);
+      }
+      break;
+
+    case 's':
+      {
+        myColor.saturate(inc);
+      }
+      break;
+
+    case 'S':
+      {
+        myColor.saturate(-inc);
+      }
+      break;
+
+    case 'b':
+      {
+        myColor.brighten(inc);
+      }
+      break;
+      
+    case 'B':
+      {
+        myColor.brighten(-inc);
+      }
+      break;
+      
+
+    case 'R':
+    case 'r':
+      {
+        myColor.h = 0;
+        myColor.s = 200;
+        myColor.v = 100;
+      }
+      break;
+
+    default: 
+      break;
     }
-    else    if ( received == 'H')
-    {
-      myColor.shiftHue(-4);
-    }
-    
+  // end switch received bytes
+  
+
+    Serial.print(myColor.h);
+    Serial.print(",");
+    Serial.print(myColor.s);
+    Serial.print(",");    
+    Serial.println(myColor.v);
+
+
     // get color object as R,G,B array for neopixels
-    
+
     uint32_t c = myColor.toRGB();
-    
+
     for(int i=0;i<NUMPIXELS;i++){
       // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
       pixels.setPixelColor(i, c );
       pixels.show(); // This sends the updated pixel color to the hardware.
     }  
-  // end serial available
+    // end serial available
   }
-  
+
 }
 
 

@@ -61,16 +61,20 @@ public:
   HSVColori& shiftHue(int amt)
   {
     h = (h + amt) & 0xFF;
+    
+    return *this;
   }
 
   HSVColori& brighten(int amt)
   {
     v = (v + amt) & 0xFF;
+    return *this;
   }
 
   HSVColori& saturate(int amt)
   {
     s = (s + amt) & 0xFF;
+    return *this;    
   }
 
   // Convert a color in H,S,V to RGB
