@@ -1,8 +1,8 @@
 /* 
  * These two classes represent colors in HSV format (which can be converted to RGB)
- * One class uses floating point numbers (HSVColorf) the other uses ints for speed (HSVColori)
+ *
  * Borrowed some code (most of toRGB) from the excellent toxiclibs - http://toxiclibs.org
- * Optimized (a bit) for C++ and the Arduino
+ * Optimized for C++ and the Arduino
  *
  * by Evan Raskob <evan@openlabworkshops.org>
  
@@ -30,7 +30,7 @@
 #define HSVColor_h
 
 
-class HSVColori
+class HSVcolor
 {
 public:
 
@@ -39,12 +39,12 @@ public:
   int v;
 
 
-  HSVColori(): 
+  HSVColor(): 
   h(0), s(0), v(0)
   { 
   }
 
-  HSVColori(int _h, int _s, int _v): 
+  HSVColor(int _h, int _s, int _v): 
   h(_h), s(_s), v(_v)
   { 
   }
@@ -58,20 +58,20 @@ public:
     v = _v;
   }
 
-  HSVColori& shiftHue(int amt)
+  HSVColor& shiftHue(int amt)
   {
     h = (h + amt) & 0xFF;
     
     return *this;
   }
 
-  HSVColori& brighten(int amt)
+  HSVColor& brighten(int amt)
   {
     v = (v + amt) & 0xFF;
     return *this;
   }
 
-  HSVColori& saturate(int amt)
+  HSVColor& saturate(int amt)
   {
     s = (s + amt) & 0xFF;
     return *this;    
@@ -164,7 +164,7 @@ public:
   // 
   // transition between two colors smoothly (linear interpolation)
   //
-  static void lerp(const HSVColori& first, const HSVColori& second, HSVColori& result, int amount)
+  static void lerp(const HSVColor& first, const HSVColor& second, HSVColor& result, int amount)
   {
     int minus_amount = 255-amount;
     result.h = (first.h*minus_amount + second.h*amount) / 255;
@@ -175,7 +175,7 @@ public:
   // 
   // transition between THIS color and a second smoothly (linear interpolation)
   //
-  void lerp(const HSVColori& second, HSVColori& result, int amount)
+  void lerp(const HSVColor& second, HSVColor& result, int amount)
   {
     lerp( (*this), second, result, amount );
   }
@@ -183,13 +183,13 @@ public:
   // 
   // transition between THIS color and a second smoothly (linear interpolation)
   //
-  HSVColori& lerp(const HSVColori& second, int amount)
+  HSVColor& lerp(const HSVColor& second, int amount)
   {
     lerp( (*this), second, (*this), amount );
     return (*this);
   }
 
-  HSVColori& operator=(const HSVColori& rhs) { 
+  HSVColor& operator=(const HSVColor& rhs) { 
     if (this != &rhs) 
     { 
       // check for self-assignment
@@ -200,7 +200,7 @@ public:
     return *this;
   }
 
-  bool operator==(const HSVColori& rhs) {  
+  bool operator==(const HSVColor& rhs) {  
     if (this == &rhs) return true;
 
     return 
@@ -211,12 +211,12 @@ public:
       );
   }
 
-  bool operator!=(const HSVColori& rhs) 
+  bool operator!=(const HSVColor& rhs) 
   {  
     return !(*this == rhs);
   }
 
-  //end class HSVColori
+  //end class HSVColor
 };
 
 
