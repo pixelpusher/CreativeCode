@@ -19,6 +19,8 @@ PShape vectorsShape = null;
 float diffVecLength; 
 Vec3D[] outwardVecs, tanVecs;
 
+boolean drawOutlines = true; // by default, draw outlines of key geometry (see keyReleased)
+
 
 void setup()
 {
@@ -45,10 +47,10 @@ void setup()
   vectorsShape = makePerpVectorsShape(spiral.getPoints());
 
   setupSplines();
- 
+
   splineShape = createProfilesShape(spiral.getPoints(), tanVecs, outwardVecs, strip.getVertices());
   splinePointsShape = createProfilesPointsShape(spiral.getPoints(), tanVecs, outwardVecs, strip.getVertices());
-  
+  splinePolygonShape = createFilledProfilesShape( spiral.getPoints(), tanVecs, outwardVecs, strip.getVertices());
   background(0);
 }
 
@@ -63,16 +65,16 @@ PShape pointsToShape(ReadonlyVec3D[] points) {
   retained.stroke(220);
   retained.strokeWeight(2);
   //retained.ambient(100);
-  
+
 
   float strokeInc = 255.0/points.length; 
   float strokeVal = strokeInc;
 
   for (ReadonlyVec3D v : points) {
-    
-    retained.stroke(strokeVal,80,strokeVal);
+
+    retained.stroke(strokeVal, 80, strokeVal);
     retained.vertex(v.x(), v.y(), v.z());
-    strokeVal += strokeInc; 
+    strokeVal += strokeInc;
   }
 
   retained.endShape();
@@ -102,50 +104,50 @@ PShape makePerpVectorsShape(final ReadonlyVec3D[] points)
     // tangents
     tanVecs[i] = points[i+1].sub( points[i-1] );
     tanVecs[i].normalizeTo(diffVecLength);
-    
+
     Vec3D v0 = points[i].sub( points[i-1] );
     Vec3D v1 = points[i].sub( points[i+1] );
-    
+
     outwardVecs[i] = v0.add(v1);
-    
+
     outwardVecs[i].normalizeTo(diffVecLength);
   }
 
   tanVecs[0].set(tanVecs[1]);
   tanVecs[numPoints-1].set(tanVecs[numPoints-2]);
-  
+
   outwardVecs[0].set(outwardVecs[1]);
   outwardVecs[numPoints-1].set(outwardVecs[numPoints-2]);
-  
+
 
   PShape retained = createShape();
-  
+
   retained.enableStyle();
   retained.beginShape(LINES);
   retained.noFill();
-  retained.stroke(240,80,0);
+  retained.stroke(240, 80, 0);
   retained.strokeWeight(2);
- 
+
   for (int i=0; i < points.length; i++)
   {
     ReadonlyVec3D v0 = points[i];
     ReadonlyVec3D v1 = outwardVecs[i];
-    
+
     // outwards vector
-    retained.stroke(240,80,0);
+    retained.stroke(240, 80, 0);
     retained.vertex(v0.x(), v0.y(), v0.z());
     retained.vertex(v0.x()+v1.x(), v0.y()+v1.y(), v0.z()+v1.z());
-    
+
     v1 = tanVecs[i];
-    
+
     //tan vector
-    retained.stroke(0,80,240);
+    retained.stroke(0, 80, 240);
     retained.vertex(v0.x(), v0.y(), v0.z());
     retained.vertex(v0.x()+v1.x(), v0.y()+v1.y(), v0.z()+v1.z());
   }
 
   retained.endShape();
-  
+
   return retained;
 }
 
@@ -154,37 +156,65 @@ PShape makePerpVectorsShape(final ReadonlyVec3D[] points)
 void draw()
 {
   background(0);
-  hint(DISABLE_DEPTH_TEST);
-  if (spiralShape != null) shape(spiralShape);
-  if (vectorsShape != null) shape(vectorsShape);
-  if (splineShape != null) shape(splineShape);
-  if (splinePointsShape != null) shape(splinePointsShape);
+  //hint(DISABLE_DEPTH_TEST);
+
+  if (drawOutlines)
+  {
+
+
+    if (spiralShape != null) shape(spiralShape);
+    if (vectorsShape != null) shape(vectorsShape);
+    if (splineShape != null) shape(splineShape);
+    if (splinePointsShape != null) shape(splinePointsShape);
+  } else
+  {
+
+    // make sure we are culling the right faces - STL files need anti-clockwise winding orders for triangles
+    PGL pgl = beginPGL();
+    pgl.enable(PGL.CULL_FACE);
+    pgl.frontFace(PGL.CCW);
+    pgl.cullFace(PGL.BACK);
+
+    if (splinePolygonShape != null) shape(splinePolygonShape);
+    endPGL(); // restores the GL defaults for Processing
+  }
 }
 
 
 void keyPressed()
 {
-  println("random noise...");
-  
-  noLoop();
-  // add random noise to spiral points
-  Vec3D[] points = spiral.getPoints();
-  float l = spiral.getLength()/12.0;
-  
-  println("spiral length: " + l);
-  
-  for (Vec3D p : points)
+  if (key == 'm')
   {
-    float rx = random(-l,l);
-    float ry = random(-l,l);
-    float rz = random(-l,l);
-    
-    p.addSelf( rx,ry,rz );
+    drawOutlines = !drawOutlines;
   }
-  
-  spiralShape = pointsToShape((ReadonlyVec3D[]) points);
-  vectorsShape = makePerpVectorsShape((ReadonlyVec3D[]) points);
-  splineShape = createProfilesShape( points, tanVecs, outwardVecs, strip.getVertices());
-  splinePointsShape = createProfilesPointsShape( points, tanVecs, outwardVecs, strip.getVertices());
-  loop();
+  else if (key == ' ')
+  {
+    println("random noise...");
+
+    noLoop();
+    // add random noise to spiral points
+    Vec3D[] points = spiral.getPoints();
+    float l = spiral.getLength()/12.0;
+
+    println("spiral length: " + l);
+
+    for (Vec3D p : points)
+    {
+      float rx = random(-l, l);
+      float ry = random(-l, l);
+      float rz = random(-l, l);
+
+      p.addSelf( rx, ry, rz );
+    }
+
+    spiralShape = pointsToShape((ReadonlyVec3D[]) points);
+    vectorsShape = makePerpVectorsShape((ReadonlyVec3D[]) points);
+    splineShape = createProfilesShape( points, tanVecs, outwardVecs, strip.getVertices());
+    splinePointsShape = createProfilesPointsShape( points, tanVecs, outwardVecs, strip.getVertices());
+    splinePolygonShape = createFilledProfilesShape( points, tanVecs, outwardVecs, strip.getVertices());
+
+
+    loop();
+  }
 }
+
