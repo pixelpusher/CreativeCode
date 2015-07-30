@@ -17,6 +17,7 @@ Spiral3D spiral = null;
 PShape spiralShape = null;
 PShape vectorsShape = null;
 float diffVecLength; 
+Vec3D[] outwardVecs, tanVecs;
 
 
 void setup()
@@ -31,6 +32,7 @@ void setup()
   float turns = 3; 
 
   diffVecLength = width/20; // length of the inwrds pointing diff vectors
+  //diffVecLength = 1; // normalize
 
   spiral = new Spiral3D( new Vec3D(0, 0, 0), new Vec3D(0, 1, 0) );
   spiral.setRadius( this.width/3, false)
@@ -42,6 +44,11 @@ void setup()
   spiralShape = pointsToShape(spiral.getPoints());
   vectorsShape = makePerpVectorsShape(spiral.getPoints());
 
+  setupSplines();
+ 
+  splineShape = createProfilesShape(spiral.getPoints(), tanVecs, outwardVecs, strip.getVertices());
+  splinePointsShape = createProfilesPointsShape(spiral.getPoints(), tanVecs, outwardVecs, strip.getVertices());
+  
   background(0);
 }
 
@@ -79,11 +86,11 @@ PShape makePerpVectorsShape(final ReadonlyVec3D[] points)
 
   // inwards pointing vector at each spiral point
 
-  Vec3D[] outwardVecs = new Vec3D[ points.length ];
+  outwardVecs = new Vec3D[ points.length ];
   for (int i=0; i < outwardVecs.length; i++)
     outwardVecs[i] = new Vec3D(0, 0, 0);
 
-  Vec3D[] tanVecs = new Vec3D[ points.length ];
+  tanVecs = new Vec3D[ points.length ];
   for (int i=0; i < tanVecs.length; i++)
     tanVecs[i] = new Vec3D(0, 0, 0);
 
@@ -115,7 +122,6 @@ PShape makePerpVectorsShape(final ReadonlyVec3D[] points)
   
   retained.enableStyle();
   retained.beginShape(LINES);
-  
   retained.noFill();
   retained.stroke(240,80,0);
   retained.strokeWeight(2);
@@ -139,6 +145,7 @@ PShape makePerpVectorsShape(final ReadonlyVec3D[] points)
   }
 
   retained.endShape();
+  
   return retained;
 }
 
@@ -150,6 +157,8 @@ void draw()
   hint(DISABLE_DEPTH_TEST);
   if (spiralShape != null) shape(spiralShape);
   if (vectorsShape != null) shape(vectorsShape);
+  if (splineShape != null) shape(splineShape);
+  if (splinePointsShape != null) shape(splinePointsShape);
 }
 
 
@@ -175,6 +184,7 @@ void keyPressed()
   
   spiralShape = pointsToShape((ReadonlyVec3D[]) points);
   vectorsShape = makePerpVectorsShape((ReadonlyVec3D[]) points);
-  
+  splineShape = createProfilesShape( points, tanVecs, outwardVecs, strip.getVertices());
+  splinePointsShape = createProfilesPointsShape( points, tanVecs, outwardVecs, strip.getVertices());
   loop();
 }
