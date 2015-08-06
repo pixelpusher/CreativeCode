@@ -13,7 +13,7 @@ import peasy.*;
 
 
 PeasyCam cam;
-Spiral3D spiral = null;
+SpiralLineStrip3D spiral = null;
 PShape spiralShape = null;
 PShape vectorsShape = null;
 float diffVecLength; 
@@ -31,32 +31,32 @@ void setup()
   cam.setMaximumDistance(width*20);
   cam.setResetOnDoubleClick(true);
 
-  float turns = 3; 
+  float turns = 3.2; 
 
   diffVecLength = width/20; // length of the inwrds pointing diff vectors
   //diffVecLength = 1; // normalize
 
-  spiral = new Spiral3D( new Vec3D(0, 0, 0), new Vec3D(0, 1, 0) );
+  spiral = new SpiralLineStrip3D( new Vec3D(0, 0, 0), new Vec3D(0, 1, 0) );
   spiral.setRadius( this.width/3, false)
     .setTurns(turns, false)
       .setDistanceBetweenTurns(this.height/(turns*2), false)
         .setNumPoints(int(turns) * 12, false)
           .setEdgeThickness( this.height/(turns*8) ); 
 
-  spiralShape = pointsToShape(spiral.getPoints());
-  vectorsShape = makePerpVectorsShape(spiral.getPoints());
+  spiralShape = pointsToShape(spiral.getVertices());
+  vectorsShape = makePerpVectorsShape(spiral.getVertices());
 
   setupSplines();
 
-  splineShape = createProfilesShape(spiral.getPoints(), tanVecs, outwardVecs, strip.getVertices());
-  splinePointsShape = createProfilesPointsShape(spiral.getPoints(), tanVecs, outwardVecs, strip.getVertices());
-  splinePolygonShape = createFilledProfilesShape( spiral.getPoints(), tanVecs, outwardVecs, strip.getVertices());
+  splineShape = createProfilesShape(spiral.getVertices(), tanVecs, outwardVecs, strip.getVertices());
+  splinePointsShape = createProfilesPointsShape(spiral.getVertices(), tanVecs, outwardVecs, strip.getVertices());
+  splinePolygonShape = createFilledProfilesShape( spiral.getVertices(), tanVecs, outwardVecs, strip.getVertices());
   background(0);
 }
 
 
 
-PShape pointsToShape(ReadonlyVec3D[] points) {        
+PShape pointsToShape(List<Vec3D> points) {        
   final PShape retained = createShape();
 
   retained.enableStyle();
@@ -67,7 +67,7 @@ PShape pointsToShape(ReadonlyVec3D[] points) {
   //retained.ambient(100);
 
 
-  float strokeInc = 255.0/points.length; 
+  float strokeInc = 255.0/points.size(); 
   float strokeVal = strokeInc;
 
   for (ReadonlyVec3D v : points) {
@@ -82,17 +82,17 @@ PShape pointsToShape(ReadonlyVec3D[] points) {
 }
 
 
-PShape makePerpVectorsShape(final ReadonlyVec3D[] points)
+PShape makePerpVectorsShape(final List<Vec3D> points)
 {
-  int numPoints = points.length;
+  int numPoints = points.size();
 
   // inwards pointing vector at each spiral point
 
-  outwardVecs = new Vec3D[ points.length ];
+  outwardVecs = new Vec3D[ points.size() ];
   for (int i=0; i < outwardVecs.length; i++)
     outwardVecs[i] = new Vec3D(0, 0, 0);
 
-  tanVecs = new Vec3D[ points.length ];
+  tanVecs = new Vec3D[ points.size() ];
   for (int i=0; i < tanVecs.length; i++)
     tanVecs[i] = new Vec3D(0, 0, 0);
 
@@ -102,11 +102,11 @@ PShape makePerpVectorsShape(final ReadonlyVec3D[] points)
   for (int i=1; i < numPoints-1; i++)
   {
     // tangents
-    tanVecs[i] = points[i+1].sub( points[i-1] );
+    tanVecs[i] = points.get(i+1).sub( points.get(i-1) );
     tanVecs[i].normalizeTo(diffVecLength);
 
-    Vec3D v0 = points[i].sub( points[i-1] );
-    Vec3D v1 = points[i].sub( points[i+1] );
+    Vec3D v0 = points.get(i).sub( points.get(i-1) );
+    Vec3D v1 = points.get(i).sub( points.get(i+1) );
 
     outwardVecs[i] = v0.add(v1);
 
@@ -128,9 +128,9 @@ PShape makePerpVectorsShape(final ReadonlyVec3D[] points)
   retained.stroke(240, 80, 0);
   retained.strokeWeight(2);
 
-  for (int i=0; i < points.length; i++)
+  for (int i=0; i < points.size(); i++)
   {
-    ReadonlyVec3D v0 = points[i];
+    ReadonlyVec3D v0 = points.get(i);
     ReadonlyVec3D v1 = outwardVecs[i];
 
     // outwards vector
@@ -193,7 +193,7 @@ void keyPressed()
 
     noLoop();
     // add random noise to spiral points
-    Vec3D[] points = spiral.getPoints();
+    List<Vec3D> points = spiral.getVertices();
     float l = spiral.getLength()/12.0;
 
     println("spiral length: " + l);
@@ -207,8 +207,8 @@ void keyPressed()
       p.addSelf( rx, ry, rz );
     }
 
-    spiralShape = pointsToShape((ReadonlyVec3D[]) points);
-    vectorsShape = makePerpVectorsShape((ReadonlyVec3D[]) points);
+    spiralShape = pointsToShape(points);
+    vectorsShape = makePerpVectorsShape(points);
     splineShape = createProfilesShape( points, tanVecs, outwardVecs, strip.getVertices());
     splinePointsShape = createProfilesPointsShape( points, tanVecs, outwardVecs, strip.getVertices());
     splinePolygonShape = createFilledProfilesShape( points, tanVecs, outwardVecs, strip.getVertices());

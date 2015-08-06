@@ -86,11 +86,11 @@ void drawSplineProfile()
 }
 
 
-PShape createProfilesShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] tanVecs, ReadonlyVec3D[] outwardVecs, List<Vec2D> profilePoints)
+PShape createProfilesShape(List<Vec3D> curvePoints, ReadonlyVec3D[] tanVecs, ReadonlyVec3D[] outwardVecs, List<Vec2D> profilePoints)
 {
   PShape retained = null;
 
-  if (tanVecs.length != outwardVecs.length && tanVecs.length != curvePoints.length)
+  if (tanVecs.length != outwardVecs.length && tanVecs.length != curvePoints.size())
   {
     println("Error in createProfilesShape: point arrays must be same length!");
     return null;
@@ -105,13 +105,13 @@ PShape createProfilesShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] tanVecs,
 
   // first perpendicular frames
 
-  for (int i=0; i < curvePoints.length; i++)
+  for (int i=0; i < curvePoints.size(); i++)
   {
     int numProfilePoints = profilePoints.size();
     for (int j=0; j < numProfilePoints; j++)
     {
       Vec2D pp = profilePoints.get(j);
-      ReadonlyVec3D v0 = curvePoints[i];
+      ReadonlyVec3D v0 = curvePoints.get(i);
       ReadonlyVec3D v1 = outwardVecs[i].getNormalized();
 
       float x = v0.x() + pp.y()*v1.x();  
@@ -128,11 +128,11 @@ PShape createProfilesShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] tanVecs,
 
 
 
-PShape createProfilesPointsShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] tanVecs, ReadonlyVec3D[] outwardVecs, List<Vec2D> profilePoints)
+PShape createProfilesPointsShape(List<Vec3D> curvePoints, ReadonlyVec3D[] tanVecs, ReadonlyVec3D[] outwardVecs, List<Vec2D> profilePoints)
 {
   PShape retained = null;
 
-  if (tanVecs.length != outwardVecs.length && tanVecs.length != curvePoints.length)
+  if (tanVecs.length != outwardVecs.length && tanVecs.length != curvePoints.size())
   {
     println("Error in createProfilesShape: point arrays must be same length!");
     return null;
@@ -147,13 +147,13 @@ PShape createProfilesPointsShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] ta
 
   // first perpendicular frames
 
-  for (int i=0; i < curvePoints.length; i++)
+  for (int i=0; i < curvePoints.size(); i++)
   {
     int numProfilePoints = profilePoints.size();
     for (int j=0; j < numProfilePoints; j++)
     {
       Vec2D pp = profilePoints.get(j);
-      ReadonlyVec3D v0 = curvePoints[i];
+      ReadonlyVec3D v0 = curvePoints.get(i);
       ReadonlyVec3D v1 = outwardVecs[i].getNormalized();
 
       float x = v0.x() + pp.y()*v1.x();  
@@ -177,11 +177,11 @@ PShape createProfilesPointsShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] ta
 
 // like before, but create faces instead of lines
 //
-PShape createFilledProfilesShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] tanVecs, ReadonlyVec3D[] outwardVecs, List<Vec2D> profilePoints)
+PShape createFilledProfilesShape(List<Vec3D> curvePoints, ReadonlyVec3D[] tanVecs, ReadonlyVec3D[] outwardVecs, List<Vec2D> profilePoints)
 {
   PShape retained = null;
 
-  if (tanVecs.length != outwardVecs.length && tanVecs.length != curvePoints.length)
+  if (tanVecs.length != outwardVecs.length && tanVecs.length != curvePoints.size())
   {
     println("Error in createProfilesShape: point arrays must be same length!");
     return null;
@@ -198,7 +198,7 @@ PShape createFilledProfilesShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] ta
 
   int faces = 0;
 
-  for (int i=0; i < curvePoints.length-1; i++)
+  for (int i=0; i < curvePoints.size()-1; i++)
   {
     int numProfilePoints = profilePoints.size();
     for (int j=0; j < numProfilePoints-1; j++)
@@ -206,10 +206,10 @@ PShape createFilledProfilesShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] ta
       Vec2D pp = profilePoints.get(j);
       Vec2D ppn = profilePoints.get(j+1);
 
-      ReadonlyVec3D v0 = curvePoints[i];
+      ReadonlyVec3D v0 = curvePoints.get(i);
       ReadonlyVec3D v1 = outwardVecs[i].getNormalized();
 
-      ReadonlyVec3D v0n = curvePoints[i+1];
+      ReadonlyVec3D v0n = curvePoints.get(i+1);
       ReadonlyVec3D v1n = outwardVecs[i+1].getNormalized();
 
       // current curve point and next in profile (1)
@@ -260,8 +260,8 @@ PShape createFilledProfilesShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] ta
   for (int j=0; j < numProfilePoints; j++)
   {
     Vec2D pp = profilePoints.get(j);
-    ReadonlyVec3D v0 = curvePoints[curvePoints.length-1];
-    ReadonlyVec3D v1 = outwardVecs[curvePoints.length-1].getNormalized();
+    ReadonlyVec3D v0 = curvePoints.get(curvePoints.size()-1);
+    ReadonlyVec3D v1 = outwardVecs[curvePoints.size()-1].getNormalized();
 
     // current curve point
     float x = v0.x() + pp.y()*v1.x();
@@ -301,7 +301,7 @@ PShape createFilledProfilesShape(ReadonlyVec3D[] curvePoints, ReadonlyVec3D[] ta
   for (j=0; j < numProfilePoints; j++)
   {
     Vec2D pp = profilePoints.get(j);
-    ReadonlyVec3D v0 = curvePoints[0];
+    ReadonlyVec3D v0 = curvePoints.get(0);
     ReadonlyVec3D v1 = outwardVecs[0].getNormalized();
 
     // current curve point
