@@ -20,7 +20,7 @@ void undo()
     IUndoAction undoAction = undoActions.removeLast();
     undoAction.action();
   }
-  catch (NoSuchElementException e)
+  catch (Exception e)
   {
     
   }
