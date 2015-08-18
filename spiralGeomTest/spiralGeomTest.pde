@@ -10,6 +10,9 @@ import toxi.math.*;
 import toxi.volume.*;
 import processing.opengl.*;
 import peasy.*;
+import toxi.geom.mesh.TriangleMesh;
+import toxi.geom.mesh.Mesh3D;
+import toxi.geom.mesh.Face;
 
 
 PeasyCam cam;
@@ -51,6 +54,12 @@ void setup()
   splineShape = createProfilesShape(spiral.getVertices(), tanVecs, outwardVecs, strip.getVertices());
   splinePointsShape = createProfilesPointsShape(spiral.getVertices(), tanVecs, outwardVecs, strip.getVertices());
   splinePolygonShape = createFilledProfilesShape( spiral.getVertices(), tanVecs, outwardVecs, strip.getVertices());
+
+
+  makeSpiralBase();
+
+  meshy = meshToRetained(mesh, false);
+
   background(0);
 }
 
@@ -128,7 +137,7 @@ PShape makePerpVectorsShape(final List<Vec3D> points)
   retained.stroke(240, 80, 0);
   retained.strokeWeight(2);
 
-  for (int i=0; i < points.size(); i++)
+  for (int i=0; i < points.size (); i++)
   {
     ReadonlyVec3D v0 = points.get(i);
     ReadonlyVec3D v1 = outwardVecs[i];
@@ -160,8 +169,6 @@ void draw()
 
   if (drawOutlines)
   {
-
-
     if (spiralShape != null) shape(spiralShape);
     if (vectorsShape != null) shape(vectorsShape);
     if (splineShape != null) shape(splineShape);
@@ -176,6 +183,10 @@ void draw()
     pgl.cullFace(PGL.BACK);
 
     if (splinePolygonShape != null) shape(splinePolygonShape);
+    if (meshy != null) shape(meshy);
+    if (baseConnectorMeshy != null) shape(baseConnectorMeshy);
+    
+    
     endPGL(); // restores the GL defaults for Processing
   }
 }
@@ -186,8 +197,7 @@ void keyPressed()
   if (key == 'm')
   {
     drawOutlines = !drawOutlines;
-  }
-  else if (key == ' ')
+  } else if (key == ' ')
   {
     println("random noise...");
 
@@ -217,4 +227,3 @@ void keyPressed()
     loop();
   }
 }
-
