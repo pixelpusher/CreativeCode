@@ -113,11 +113,11 @@ void draw()
   endPGL();
 
 
-  noFill();
-  strokeWeight(4);
+  //noFill();
+  //strokeWeight(4);
 
-  drawStripPoints(c1);
-  drawStripPoints(c2);
+ // drawStripPoints(c1);
+ // drawStripPoints(c2);
 }
 
 
@@ -223,4 +223,3 @@ PShape meshToRetained(Mesh3D mesh, boolean smth) {
   retained.endShape();
   return retained;
 }
-
