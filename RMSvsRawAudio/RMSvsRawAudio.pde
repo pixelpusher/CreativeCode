@@ -1,18 +1,7 @@
-// 3d sound spiral generator
+// waveform vs RMS power example
 //  by evan raskob evanraskob@gmail.com
 // wave code uses code from http://code.google.com/p/musicg/
 //
-// Draw a base spiral and offset it by the sound volume (RMS)
-//
-// TODO
-// - fix bounding box pshape display - not showing due to some PShape thing?
-// - bounding box check - model size display too!! How bug are these??
-// - see BezierTween for example of generating smooth geometry between profile shapes
-// - how about a REPL for commands instead of stupid key presses
-// - need flat base for stand and for printing properly...
-// - how about filling it to the max spikiness in between shapes, so it is recessed rather 
-// than filled?
-// - or inner removal of material rather than exterior extrusion
 
 
 import java.io.*;
@@ -25,10 +14,13 @@ import toxi.math.*;
 import toxi.volume.*;
 import processing.opengl.*;
 import peasy.*;
-
+import com.musicg.wave.WaveHeader;
+import com.musicg.wave.Wave;
+import com.musicg.wave.extension.NormalizedSampleAmplitudes;
 
 
 boolean fileChosen = false;
+boolean useLogScale = false;
 PrintWriter output, outputRMS;
 float[] soundAmplitudes;
 float[] rmsAmplitudes, rmsAmplitudes2;
@@ -107,7 +99,17 @@ void createShapes()
 
   for (int i=0; i < soundAmplitudes.length; i++)
   { 
-    v.setY( height-soundAmplitudes[i]*height*0.8f+yPos);
+    float data = soundAmplitudes[i];
+
+    if (useLogScale)
+    {
+      float absData = abs(data);
+      float sign = data/absData; // positive or negative
+
+      data = sign*logScale(absData, 0f, 1f);
+    }
+
+    v.setY( height-data*height*0.8f+yPos);
     pvertex(soundAmpsShape, v);
     v.addSelf(widthInc, 0, 0);
   }
@@ -127,12 +129,19 @@ void createShapes()
 
   for (int i=0; i < rmsAmplitudes.length; i++)
   { 
-    v.setY( height-rmsAmplitudes[i]*height*1.6f*spikiness+yPos);
+    float data = rmsAmplitudes[i];
+
+    /* Note: using log scaling here doesn't really make sense because we've already calcuated sums linearly  
+     if (useLogScale)
+     {
+     data = logScale(data, 0f, 1f);
+     }
+     */
+    v.setY( height-data*height*1.6f*spikiness+yPos);
     pvertex(soundRMSShape, v);
     v.addSelf(widthInc, 0, 0);
   }
   soundRMSShape.endShape();
-
 
 
   soundRMSShape2 = createShape();
@@ -149,14 +158,19 @@ void createShapes()
 
   for (int i=0; i < rmsAmplitudes2.length; i++)
   { 
-    v.setY( height-rmsAmplitudes2[i]*height*1.6f*spikiness+yPos);
+    float data = rmsAmplitudes2[i];
+
+    /* Note: using log scaling here doesn't really make sense because we've already calcuated sums linearly
+     if (useLogScale)
+     {
+     data = logScale(data, 0f, 1f);
+     }
+     */
+    v.setY( height-data*height*1.6f*spikiness+yPos);
     pvertex(soundRMSShape2, v);
     v.addSelf(widthInc, 0, 0);
   }
   soundRMSShape2.endShape();
-
-
-
 }
 
 
@@ -173,7 +187,7 @@ void draw()
 
   if (soundRMSShape != null)
     shape(soundRMSShape);
-    
+
   if (soundRMSShape2 != null)
     shape(soundRMSShape2);
 
@@ -267,8 +281,13 @@ void keyReleased()
       background(0, 200, 0);
       selectInput("Select a file to process:", "fileSelected");
     }
+  } else if (key=='l')
+  { 
+    useLogScale = !useLogScale;
+    computeRMS();
   }
 }
+
 
 
 
@@ -314,8 +333,9 @@ void fileSelected(File selection)
         RMSSize = max(1, int(amps.length / (100.0f))); 
 
         for (int i=0; i<amps.length; i++)
+        {
           soundAmplitudes[i] = (float) amps[i];
-
+        }
         println("found " + soundAmplitudes.length + " samples");
       } 
       catch (Exception e) 
@@ -380,15 +400,24 @@ void computeRMS()
     while (RMSIndex < RMSSize)
     {
       // convert data to float
-      float data = (float)soundAmplitudes[currentIndex];
+      float data = soundAmplitudes[currentIndex];
+
+      if (useLogScale)
+      {
+        float absData = abs(data);
+        float sign = data/absData; // positive or negative
+
+        data = sign*logScale(absData, 0f, 1f);
+      }
+
       float diffData = data - prevData;
       // debug
       /*if (rmsArrayIndex == rmsAmplitudes.length-1)
        {
        // println("data[" + currentIndex + "]=" + data);
        }*/
-      RMSSum += diffData*diffData; // add square of data to sum
-      RMSSum2 += data*data; // add square of data to sum
+      RMSSum2 += diffData*diffData; // add square of data to sum
+      RMSSum += data*data; // add square of data to sum
       currentIndex++; 
       RMSIndex++;
       prevData = data;
@@ -407,31 +436,31 @@ void computeRMS()
 
   /*
   float[] rmsAmplitudesExtended = new float[rmsAmplitudes.length*TWEEN_POINTS];  //leave room for end->start
-
-  for (int i=0; i<rmsAmplitudes.length-1; i++)
-  {
-    for (int ii=0; ii < TWEEN_POINTS; ii++)
-    {
-      // calculate linear mix of two vectors 
-      float progress = (float)ii/(TWEEN_POINTS-1); // make sure it goes to 100%
-      float tweenVal = tween.interpolate(rmsAmplitudes[i], rmsAmplitudes[i+1], progress); // get values btw 0 and 1
-      rmsAmplitudesExtended[i*TWEEN_POINTS+ii] = tweenVal;
-    }
-  }
-  // now start to finish
-  float first = rmsAmplitudes[0];
-  float last = rmsAmplitudes[rmsAmplitudes.length-1];
-
-  for (int ii=0; ii < TWEEN_POINTS; ii++)
-  {
-    // calculate linear mix of two vectors 
-    float progress = (float)ii/(TWEEN_POINTS-1); // make sure it goes to 100%
-    float tweenVal = tween.interpolate(last, first, progress); // get values btw 0 and 1
-    rmsAmplitudesExtended[(rmsAmplitudes.length-1)*TWEEN_POINTS+ii] = tweenVal;
-  }
-
-  rmsAmplitudes = rmsAmplitudesExtended;
-  */
+   
+   for (int i=0; i<rmsAmplitudes.length-1; i++)
+   {
+   for (int ii=0; ii < TWEEN_POINTS; ii++)
+   {
+   // calculate linear mix of two vectors 
+   float progress = (float)ii/(TWEEN_POINTS-1); // make sure it goes to 100%
+   float tweenVal = tween.interpolate(rmsAmplitudes[i], rmsAmplitudes[i+1], progress); // get values btw 0 and 1
+   rmsAmplitudesExtended[i*TWEEN_POINTS+ii] = tweenVal;
+   }
+   }
+   // now start to finish
+   float first = rmsAmplitudes[0];
+   float last = rmsAmplitudes[rmsAmplitudes.length-1];
+   
+   for (int ii=0; ii < TWEEN_POINTS; ii++)
+   {
+   // calculate linear mix of two vectors 
+   float progress = (float)ii/(TWEEN_POINTS-1); // make sure it goes to 100%
+   float tweenVal = tween.interpolate(last, first, progress); // get values btw 0 and 1
+   rmsAmplitudesExtended[(rmsAmplitudes.length-1)*TWEEN_POINTS+ii] = tweenVal;
+   }
+   
+   rmsAmplitudes = rmsAmplitudesExtended;
+   */
   createShapes();
 }
 
@@ -450,4 +479,3 @@ void vertex(float[] v)
 {
   vertex(v[0], v[1], v[2]);
 }
-
