@@ -1,4 +1,12 @@
-int tosses = 10;
+// This shows how the probability of independent events 
+// tails off quite rapidly - in this case, flipping a coin
+// and counting the number of times in a row it lands either heads
+// or tails
+//
+// by Evan Raskob <e.raskob@rave.ac.uk> 2015
+
+
+int tosses = 9;  // due to rounding errors, over 49 and the grid will be messed up
 
 int results[];
 
