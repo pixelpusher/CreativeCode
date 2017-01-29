@@ -14,27 +14,27 @@ class Cycle
 
   private ArrayList<PVector> path;
   private int ox, oy, dir, handedness;
-  private int lifetime=0; // max number of ticks this 'lives' for
-  private int currentTime=0; // current 'tick'
+  private int maxLife=0; // max number of ticks this 'lives' for
+  private int currentLife=0; // current 'tick'
 
   private PShape pathShape;
 
-  Cycle(int _x, int _y, int _lifetime) {
-    init(_x, _y, _lifetime);
+  Cycle(int _x, int _y, int _maxLife) {
+    init(_x, _y, _maxLife);
   }
 
   //
   // reset or re-init the Cycle
   //
-  Cycle init(int _x, int _y, int _lifetime) {
+  Cycle init(int _x, int _y, int _maxLife) {
     ox = x = _x;
     oy = y = _y;
 
-    setLifetime(_lifetime);
+    setmaxLife(_maxLife);
 
     dir = millis()%4;
     c = color(255);
-    deadColor = color(255, 100, 255);
+    deadColor = color(180, 100, 180);
     overlayColor = color(255, 255, 180);
     handedness = (random(1.0)>0.5) ? 1 : 3;
     alive = true;
@@ -52,16 +52,16 @@ class Cycle
   //
   // set how many ticks (or points) this Cycle 'lives' for
   //
-  Cycle setLifetime(int i)
+  Cycle setmaxLife(int i)
   {
     i = max(i, 1); // less than 1 is dumb
-    lifetime = i;
-    currentTime = 0; // reset elapsed time count
+    maxLife = i;
+    currentLife = 0; // reset elapsed time count
 
     path = null; // force garbage collection...
-    path = new ArrayList<PVector>(lifetime);
+    path = new ArrayList<PVector>(maxLife);
 
-    while (path.size() <lifetime)
+    while (path.size() <maxLife)
     {
       path.add(new PVector(ox, oy));
     }
@@ -71,7 +71,7 @@ class Cycle
     pathShape.beginShape();
     pathShape.noFill();
     pathShape.stroke(255);
-    pathShape.strokeWeight(2);
+    pathShape.strokeWeight(4);
 
     for (PVector v : path) 
     {
@@ -82,12 +82,19 @@ class Cycle
     return this;
   }
 
+  void freeGrid(Grid g)
+  {
+    for (PVector v : path) 
+    {
+      grid.set((int)v.x, (int)v.y, Grid.CLEAR);
+    }
+  }
+
 
   void move(Grid g) 
   {
-    currentTime++;
-    if (currentTime >= lifetime) alive = false;
-    else 
+    currentLife++;
+    if (currentLife < maxLife) 
     {
 
       // only reason we check dir+2 is when just-reborn
@@ -119,11 +126,27 @@ class Cycle
           // update grid
           g.set(newx, newy, Grid.SOLID);
           // update path
-          path.get(currentTime).set(newx, newy);
-          pathShape.setVertex(currentTime, newx, newy);
+          path.get(currentLife).set(newx, newy);
+          
+          for (int i=currentLife; i>0; i--)
+          {
+            PVector v = pathShape.getVertex(maxLife-i);
+            pathShape.setVertex(maxLife-i-1,v);
+          }
+          pathShape.setVertex(maxLife-1, newx, newy);
+          
+          
         }
-      } else alive = false;
-    }// end within lifetime
+      } else 
+      {
+        alive = false;
+        pathShape.setStroke(deadColor);
+      }
+    }
+    else {
+      alive = false;
+        pathShape.setStroke(deadColor); // huh? got to rethink this
+    }
   }// end move
 
 

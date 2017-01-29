@@ -12,7 +12,6 @@ float endMouseY   = 0;
 
 LinkedList jtMouseEvents;
 
-
 int formatRecMouseXPos(String mXp)
 {
   return (int)((float)myW *  float(mXp)/(float)recScreenWidth);
@@ -60,10 +59,17 @@ void mousePressed()
 
 void handleMousePressed()
 {
+  if (!theMouseDown)
+  {
+    addCycle(sketchMouseX(), sketchMouseY());
+  }
+  
   theMouseDown = true;
   startMouseX=sketchMouseX();
   startMouseY=sketchMouseY();
-
+  
+  grid.set(sketchMouseX()/scaling, sketchMouseY()/scaling, Grid.CLEAR);
+  
   //println("pressed: " + sketchMouseX() + ", " + sketchMouseY());
 }
 
@@ -75,17 +81,16 @@ void mouseDragged()
   handleMouseDragged();
 }
 
+//
+// add cycle if 
+//
 void handleMouseDragged()
 {
   theMouseDown = true;
-
-    //if (G.distToLast(sketchMouseX(), sketchMouseY()) > minMove) {
-    //    G.addPoint((float)sketchMouseX(), (float)sketchMouseY(), 0f);
-    //    G.smooth();
-    //    G.compile();
-    //  }
-    //}
- 
+  if (dist(sketchMouseX(), sketchMouseY(), sketchpMouseX(), sketchpMouseY()) > minMove)
+  {
+    addCycle(sketchMouseX(), sketchMouseY());
+  }
 }
 
 void mouseMoved()

@@ -36,14 +36,18 @@ void handleKeyPressed()
       break;
 
     case '1': 
-      if (!rendering) saveEvents();
+      if (!rendering) 
+      {
+        rendering = true;
+        saveEvents();
+      }
       break;
 
     case '+':
     case '=':
       break;
 
-    case '-':
+    case '-': saveFrame();
       break;
 
     case '\\': 
