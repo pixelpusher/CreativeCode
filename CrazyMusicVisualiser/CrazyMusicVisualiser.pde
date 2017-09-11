@@ -125,8 +125,8 @@ void init() {
  // get  properly set up.
  super.init();
  }
- */
-
+ 
+*/
 // 
 // setup
 //
@@ -134,7 +134,7 @@ void init() {
 void setup()
 {
   // set size and renderer
-  size(1024, 768, GLConstants.GLGRAPHICS);
+  size(screen.width, screen.height, GLConstants.GLGRAPHICS);
   frameRate(60);
   noCursor();
   

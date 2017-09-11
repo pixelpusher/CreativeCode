@@ -9,7 +9,7 @@
         <vertex dx="-2.0" dy="764.0" sx="0.0" sy="1024.0"/>
       </vertices>
     </shape>
-    <shape media="rose.png" mediaPath="/Users/evan/Documents/Processing2/CreativeCode/CrazyMusicVisualiser/data/rose.png" mediaType="image" name="shape1.36861606E9">
+    <shape media="rose.png" mediaPath="c:/Users/evanr/Documents/code/CreativeCode/CrazyMusicVisualiser/data/rose.png" mediaType="image" name="shape1.36861606E9">
       <vertices count="4">
         <vertex dx="438.0" dy="292.0" sx="0.0" sy="0.0"/>
         <vertex dx="694.0" dy="292.0" sx="256.0" sy="0.0"/>
