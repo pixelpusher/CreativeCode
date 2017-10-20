@@ -4,22 +4,25 @@ import processing.svg.*;
 LineStrip2D strip;
 int diameterQuality = 10;
 
+
+float spiralThickness = 23.07f; // in mm
+float spiralRadius = 14.172489f; // in mm
+float adjust = 0.2219f;
+float spikiness = 23.164747f;
+float minThickness = 0.08916104f; // percentage, 0 - 1
+float scaleFactor = 0.5*width/spikiness;
+float turns = 3.5;
+
+float y =  spikiness*scaleFactor;
+float yBase = 1f*spikiness;
+
+float x = spiralThickness*scaleFactor;
+float xBase = 0; // minRMS*spiralThickness; // TODO: is this right??
+
+
 void setup()
 { 
-  size(1200, 1200, P3D);
-
-  float spiralThickness = 23.07f; // in mm
-  float spiralRadius = 14.172489f; // in mm
-  float adjust = 0.2219f;
-  float spikiness = 23.164747f;
-  float minThickness = 0.08916104f; // percentage, 0 - 1
-  float scaleFactor = 0.5*width/spikiness;
-
-  float y =  spikiness*scaleFactor;
-  float yBase = 1f*spikiness;
-
-  float x = spiralThickness*scaleFactor;
-  float xBase = 0; // minRMS*spiralThickness; // TODO: is this right??
+  size(1000, 1000, P3D);
 
   makeProfile2(x, y);
 }
@@ -52,7 +55,7 @@ void makeProfile2(float x, float y)
   {
     double prog = Math.abs(angle/(maxAngle/2) - 1);
     //double prog = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.2d); // little pointy on top
- 
+
     prog -= 1d;
     prog = prog*prog; // smoothing
     prog = prog*prog; //cubic?
@@ -60,28 +63,57 @@ void makeProfile2(float x, float y)
     double xx = (1d-prog)*x;
 
     strip.add((float)(0.5d*xx*(Math.cos(angle+offset)+1d)), 
-              (float)(0.5d*xx*(Math.sin(angle+offset)+1d)));
+      (float)(0.5d*xx*(Math.sin(angle+offset)+1d)));
   }
 }
 
 
 void draw() 
 {
-  beginRecord(SVG, "spline.svg");
-  translate(3*width/4, 3*height/4);
+  beginRecord(SVG, "helix.svg");
+  translate(2*width/4, 3.5*height/4);
   rotate(PI);
-  int numVerts = strip.getVertices().size();
+  int numVerts = 100;
 
-  float diam = 10;
+  float diam = 8;
 
-  Vec2D pv = strip.get(0);
+  //Vec2D pv = strip.get(0);
+
+
+  double px=0d, py=0d;
 
   background(255);
   ellipseMode(CENTER);
   strokeWeight(2);
 
+ for (int i=1; i < numVerts; i++)
+  { 
+    double p = i/(double)numVerts;
+
+    double x = 10*Math.sin(p*Math.PI*2d*turns)*spiralRadius;
+    double y = 10*p*turns*spiralThickness;
+
+    stroke(10);
+
+    line((float)px, (float)py, (float)x, (float)y);
+
+    noStroke();
+    fill(10, 80, 10, 255);
+    ellipse((float)px, (float)py, diam, diam);
+
+    px = x;
+    py = y;
+  }
+   ellipse((float)px, (float)py, diam, diam);
+
+
+/*
   for (int i=1; i < numVerts; i++)
   { 
+    float p = i/float(numVerts);
+
+    double x = sin(p*Math.PI*2d*turns);
+
     float fade = i/float(numVerts);
     fade = 1f-0.875*
       fade*fade;
@@ -99,6 +131,8 @@ void draw()
 
     pv = cv;
   }
+  */
+  
   /* 
    noFill();
    strokeWeight(3);
