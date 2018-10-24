@@ -4,28 +4,24 @@ import processing.svg.*;
 LineStrip2D strip;
 int diameterQuality = 10;
 
+float spiralThickness = 23.07f; // in mm
+float spiralRadius = 14.172489f; // in mm
+float adjust = 0.2219f;
+float spikiness = 23.164747f;
+float minThickness = 0.08916104f; // percentage, 0 - 1
+float scaleFactor = height;
+float currentExtrusion = 0.5f + adjust;
+float y = spikiness*scaleFactor*adjust;
+float x = spiralThickness*scaleFactor*adjust;
+
 void setup()
 { 
   size(1200, 1200, P3D);
-
-  float spiralThickness = 23.07f; // in mm
-  float spiralRadius = 14.172489f; // in mm
-  float adjust = 0.2219f;
-  float spikiness = 23.164747f;
-  float minThickness = 0.08916104f; // percentage, 0 - 1
-  float scaleFactor = 0.5*width/spikiness;
-
-  float y =  spikiness*scaleFactor;
-  float yBase = 1f*spikiness;
-
-  float x = spiralThickness*scaleFactor;
-  float xBase = 0; // minRMS*spiralThickness; // TODO: is this right??
-
-  makeProfile2(x, y);
+  makeProfile3(x, y);
 }
 
 
-
+// for others
 void makeProfile1(float x, float y)
 {
   Spline2D spline = new Spline2D();
@@ -39,6 +35,7 @@ void makeProfile1(float x, float y)
   strip = spline.toLineStrip2D(diameterQuality);
 }
 
+// for 008
 void makeProfile2(float x, float y)
 {
   // pointy on top v2    
@@ -52,7 +49,7 @@ void makeProfile2(float x, float y)
   {
     double prog = Math.abs(angle/(maxAngle/2) - 1);
     //double prog = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.2d); // little pointy on top
- 
+
     prog -= 1d;
     prog = prog*prog; // smoothing
     prog = prog*prog; //cubic?
@@ -60,10 +57,45 @@ void makeProfile2(float x, float y)
     double xx = (1d-prog)*x;
 
     strip.add((float)(0.5d*xx*(Math.cos(angle+offset)+1d)), 
-              (float)(0.5d*xx*(Math.sin(angle+offset)+1d)));
+      (float)(0.5d*xx*(Math.sin(angle+offset)+1d)));
   }
 }
 
+
+
+// SIN squared smoothed SPIKES smoothed
+// for 005 & 006
+void makeProfile3(float x, float y)
+{
+  /*
+  fstr(turns, 2) +"-" +
+   fstr(distanceBetweenSpirals, 2) + "-" +
+   fstr(spiralThickness, 2) + "-" +
+   fstr(spiralRadius, 2) + "-" +
+   fstr(adjust, 4) + "-" +
+   fstr(spikiness, 2) + "-" +
+
+   */
+
+  double inc = Math.PI/24d;
+  double maxAngle = Math.PI*2d;
+  double offset = Math.PI/6d;
+
+  strip = new LineStrip2D();
+
+  // pointy on top v2 
+  for (double angle=0; angle<maxAngle; angle+=inc)
+  {
+    //double prog = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.5d); // full sin
+    double prog = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.2d); // little pointy on top
+    //prog = prog*prog; // smoothing
+    //prog = prog*prog; //cubic?
+
+    double xx = 2*prog*x;  //yeah, float/double conversion blah blah
+
+    strip.add((float)(0.5d*xx*(Math.cos(angle+offset)+1d)), (float)(0.5d*xx*(Math.sin(angle+offset)+1d)));
+  }
+}
 
 void draw() 
 {
@@ -96,9 +128,20 @@ void draw()
     noStroke();
     ellipse(pv.x, pv.y, diam, diam);
 
+    println(pv);
+
 
     pv = cv;
   }
+
+  noFill();
+  strokeWeight(3);
+  stroke(0, 0, 0);
+  line(0, 0, 600, 0);
+  line(0, 0, 0, 600);
+
+
+
   /* 
    noFill();
    strokeWeight(3);
