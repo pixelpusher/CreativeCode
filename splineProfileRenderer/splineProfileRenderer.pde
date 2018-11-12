@@ -121,33 +121,57 @@ void makeProfile4()
   double centerOffX = 2.8;
   double centerOffZ = 2.2; // try 1.2 or 1.8
 
+  double minP = 999999;
+  double maxP = -999999;
+
   for (double angle=0; angle<=maxAngle; angle+=inc)
   {
     //double prog = Math.abs(angle/(maxAngle/2) - 1); //-1 to 1 --> 1 to 0 to 1
     double prog = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.4d); // little pointy on top
+    double progMax = Math.sin(Math.abs(Math.PI/2d/(maxAngle/2) - 1d)*Math.PI*0.4d); // little pointy on top
+
 
     //prog = 0.75d + 0.25d*Math.cos(8*Math.PI * prog);
 
+    progMax -= 1d;
+
     prog -= 1d; // 0 to -1 to 0
     prog = prog*prog*Math.abs(prog); // smoothing, petal-like
+    prog = 2d-prog; // 0-1 range
+
+    progMax = progMax*progMax*Math.abs(progMax); // smoothing, petal-like
+    progMax = 2d-progMax; // 0-1 range
+
+    minP = Math.min(2d-prog, minP);
+    maxP = Math.max(2d-prog, maxP);
+
+
     //prog = prog*prog; //cubic?
 
-    double xx = (2d-prog)*x + prog*xBase;
+    double xx = prog*x + prog*xBase;
+    double factor = 55;
 
-    float newz = (float)(0.185d*xx*(Math.sin(angle+offset)+centerOffX)-55*centerOffX);
-    float newx = (float)(0.185d*xx*(Math.cos(angle+offset)+centerOffZ)-55*centerOffZ);
+    //float newz = (float)(0.185d*xx*(Math.sin(angle+offset)+centerOffX)-2d*x*(Math.sin(offset)+centerOffX)*0.185d);
+    //float newx = (float)(0.185d*xx*(Math.cos(angle+offset)+centerOffZ)-2d*x*(Math.cos(offset)+centerOffZ)*0.185d);
+
+    float newz = (float)(0.185d*xx*(Math.sin(angle+offset)+centerOffX)-2d*x*(Math.sin(Math.PI)+centerOffX)*0.185d);
+    float newx = (float)(0.185d*xx*(Math.cos(angle+offset)+centerOffZ)-2d*x*(Math.cos(Math.PI)+centerOffZ)*0.185d);
+
+//    float newz = (float)(0.185d*xx*(Math.sin(angle+offset)+centerOffX)-centerOffX-2*x*0.185d);
+//    float newx = (float)(0.185d*xx*(Math.cos(angle+offset)+centerOffZ)-centerOffZ-2*x*0.185d);
+
 
     if (angle == 0)
     {
       x0 = newx;
       z0 = newz;
     }
-
-
-
     strip.add(newx, newz);
   }
   strip.add(x0, z0);     // END SIN SPIKES 2
+
+  println("Min/max: "+ minP + ", " + maxP);
+  println(x);
 }
 
 
@@ -186,8 +210,6 @@ void makeProfile5()
       x0 = newx;
       z0 = newz;
     }
-
-
 
     strip.add(newx, newz);
   }
@@ -231,7 +253,7 @@ void draw()
     background(255);
     fill(0);
     textSize(48);
-    text("enter a number from 1-4 to render a profile", width/2, height/2);  
+    text("enter a number from 1-4 to render a profile", width/6, height/6);  
     break;
   }
 
@@ -265,7 +287,8 @@ void draw()
     { 
       Vec2D cv = strip.get(i);
       vertex(cv.y, cv.x);
-      println(cv);
+      // DEBUG vertices
+      //println(cv);
     }
     endShape(CLOSE);
 
