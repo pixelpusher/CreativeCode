@@ -1,28 +1,44 @@
+/**
+ * Testing bed and vector image renderer for swept helical forms.
+ * Used in wavespiralstudio: https://github.com/pixelpusher/wavespiralvolumetric/tree/spiralspaper
+ *
+ * Copyright Evan Raskob, 2018.
+ * evanraskob@gmail.com
+ *
+ * Released under the AGPL 3.0+ license: https://www.gnu.org/licenses/agpl-3.0.en.html
+ *
+ *
+ */
+
 import toxi.geom.*;
 import processing.svg.*;
 
 LineStrip2D strip; //container for final list of points
-Spline2D spline = new Spline2D(); //used only in some profiles
+Spline2D spline = new Spline2D(); //B-spline implementation used only in some profiles
 
+// common shape and scale variables:
 
-float xScale = 23.07f; // in mm
+float xScale = 23.07f; // horizontal scale in mm
+float zScale = 23.164747f; // vertical scale in mm
 float adjust = 0.2219f; // empirically-derived adjustment factor to make sure size in mm fits printable model dimensions
-float zScale = 23.164747f;
-float scaleFactor = height;
-float z = zScale*scaleFactor*adjust;
-float x = xScale*scaleFactor*adjust;
+float scaleFactor = height; // scaling factor to fit on screen properly
+float x = xScale*scaleFactor*adjust; // screen-adjusted horizontal coordinate
+float z = zScale*scaleFactor*adjust; // screen-adjusted vertical coordinate
+
 
 double xBase = 0; // an optional minimum or "base" length in the x-direction
 
-// needs to be 2PI so we get an elliptical, closed shape (only for elliptical shapes). Minimum angle is 0, of course.
+// Maximum angle for parametric sinusoidal shape envelope - needs to be 2PI so we get an elliptical, closed shape (only 
+// for elliptical shapes). Minimum angle is 0, of course.
 double maxAngle = Math.PI*2d; 
 
-
+// vector shape output variables
 byte profileNumber = 0; // number of the profile to draw, from 0-4
 String profileName = "B-spline";
 String profileDate = year() + "-" + month() + "-" + day();
 
 boolean recording = true; // record to SVG or not
+
 
 
 void setup()
@@ -55,25 +71,23 @@ void makeProfile1()
 // for spiral 008
 void makeProfile2()
 {
-  // rounded teardrop shape, with too-small tail (was an error)
+  // rounded teardrop shape, with too-small tail (this profile has an error)
   profileName = "Param ellipse 008";
-
 
   // pointy on top v2    
   double inc = Math.PI/24d;
-  double maxAngle = Math.PI*2d;
   double offset = Math.PI/2d;
 
   for (double angle=0; angle<maxAngle; angle+=inc)
   {
-    double prog = Math.abs(angle/(maxAngle/2) - 1);
-    //double prog = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.2d); // little pointy on top
+    double envelope = Math.abs(angle/(maxAngle/2) - 1);
+    //double envelope = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.2d); // little pointy on top
 
-    prog -= 1d;
-    prog = prog*prog; // smoothing
-    prog = prog*prog; //quadratic/rounder
+    envelope -= 1d;
+    envelope = envelope*envelope; // smoothing
+    envelope = envelope*envelope; //quadratic/rounder
 
-    double xx = (1d-prog)*x;
+    double xx = (1d-envelope)*x;
 
     strip.add((float)(0.5d*xx*(Math.cos(angle+offset)+1d)), 
       (float)(0.5d*xx*(Math.sin(angle+offset)+1d)));
@@ -88,19 +102,18 @@ void makeProfile3()
   // like a symmetrical leaf petal
   profileName = "Param ellipse 005-6";
 
-  double inc = Math.PI/24d;
-  double maxAngle = Math.PI*2d;
-  double offset = Math.PI/6d;
+  double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
+  double offset = Math.PI/8d; // smaller values ( < PI/2) curl shape CCW, larger values in CW direction
 
   // pointy on top v2 
   for (double angle=0; angle<maxAngle; angle+=inc)
   {
-    //double prog = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.5d); // full sin
-    double prog = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.2d); // little pointy on top
-    //prog = prog*prog; // smoothing
-    //prog = prog*prog; //cubic?
+    //double envelope = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.5d); // full sin
+    double envelope = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.2d); // little pointy on top
+    //envelope = envelope*envelope; // smoothing
+    //envelope = envelope*envelope; //cubic?
 
-    double xx = 2*prog*x;  //yeah, float/double conversion blah blah
+    double xx = 2*envelope*x;  //yeah, float/double conversion blah blah
 
     strip.add((float)(0.5d*xx*(Math.cos(angle+offset)+1d)), (float)(0.5d*xx*(Math.sin(angle+offset)+1d)));
   }
@@ -112,55 +125,37 @@ void makeProfile4()
   // ghost-shaped (rounded, angled teardrop)
   profileName = "Param cubic ellipse 012";
 
-  double inc = Math.PI/48d; // the resokution of the curve (smaller = more detail)
-  double maxAngle = Math.PI*2d; // needs to be 2PI so we get an elliptical, closed shape
+  double inc = Math.PI/48d; // the resolution of the curve (smaller = more detail)
   double offset = Math.PI/8d; // smaller means curlier on the bottom, PI/2 means symmetrical
+  double curviness = 0.4d; // how curvy/paisley-like the final shape is. 0 is circular, 0.5 is max before outline splits
 
   float x0=0, z0=0;
 
-  double centerOffX = 2.8;
-  double centerOffZ = 2.2; // try 1.2 or 1.8
-
-  double minP = 999999;
-  double maxP = -999999;
+  double centerOffX = 2.8; // Shape central offset in horizonal direction
+  double centerOffZ = 2.2; // Shape central offset in vertical direction
 
   for (double angle=0; angle<=maxAngle; angle+=inc)
-  {
-    //double prog = Math.abs(angle/(maxAngle/2) - 1); //-1 to 1 --> 1 to 0 to 1
-    double prog = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.4d); // little pointy on top
-    double progMax = Math.sin(Math.abs(Math.PI/2d/(maxAngle/2) - 1d)*Math.PI*0.4d); // little pointy on top
+  {    
+    double envelope = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*curviness); // this will modify the elliptical profile shape
+    double envelopeMin = Math.sin(Math.abs(Math.PI/(maxAngle/2) - 1d)*Math.PI*curviness); //  minimum value, for offsetting curve to 0
 
+    //envelope = 0.75d + 0.25d*Math.cos(8*Math.PI * envelope);
 
-    //prog = 0.75d + 0.25d*Math.cos(8*Math.PI * prog);
+    envelope -= 1d; // 0 to -1 to 0
+    envelope = envelope*envelope*Math.abs(envelope); // smoothing, petal-like
+    envelope = 2d-envelope; // 0-1 range
+    
+    envelopeMin -= 1d;
+    envelopeMin = envelopeMin*envelopeMin*Math.abs(envelopeMin); // smoothing, petal-like
+    envelopeMin = 2d-envelopeMin; // 0-1 range
 
-    progMax -= 1d;
+    double xx = envelope*x + envelope*xBase;
+    double xxMin = envelopeMin*x + envelopeMin*xBase;
 
-    prog -= 1d; // 0 to -1 to 0
-    prog = prog*prog*Math.abs(prog); // smoothing, petal-like
-    prog = 2d-prog; // 0-1 range
+    float newz = (float)(0.185d*xx*(Math.sin(angle+offset)+centerOffX)-xxMin*(Math.sin(Math.PI+offset)+centerOffX)*0.185d);
+    float newx = (float)(0.185d*xx*(Math.cos(angle+offset)+centerOffZ)-xxMin*(Math.cos(Math.PI+offset)+centerOffZ)*0.185d);
 
-    progMax = progMax*progMax*Math.abs(progMax); // smoothing, petal-like
-    progMax = 2d-progMax; // 0-1 range
-
-    minP = Math.min(2d-prog, minP);
-    maxP = Math.max(2d-prog, maxP);
-
-
-    //prog = prog*prog; //cubic?
-
-    double xx = prog*x + prog*xBase;
-    double factor = 55;
-
-    //float newz = (float)(0.185d*xx*(Math.sin(angle+offset)+centerOffX)-2d*x*(Math.sin(offset)+centerOffX)*0.185d);
-    //float newx = (float)(0.185d*xx*(Math.cos(angle+offset)+centerOffZ)-2d*x*(Math.cos(offset)+centerOffZ)*0.185d);
-
-    float newz = (float)(0.185d*xx*(Math.sin(angle+offset)+centerOffX)-2d*x*(Math.sin(Math.PI)+centerOffX)*0.185d);
-    float newx = (float)(0.185d*xx*(Math.cos(angle+offset)+centerOffZ)-2d*x*(Math.cos(Math.PI)+centerOffZ)*0.185d);
-
-//    float newz = (float)(0.185d*xx*(Math.sin(angle+offset)+centerOffX)-centerOffX-2*x*0.185d);
-//    float newx = (float)(0.185d*xx*(Math.cos(angle+offset)+centerOffZ)-centerOffZ-2*x*0.185d);
-
-
+    // save first points to connect later
     if (angle == 0)
     {
       x0 = newx;
@@ -168,11 +163,9 @@ void makeProfile4()
     }
     strip.add(newx, newz);
   }
-  strip.add(x0, z0);     // END SIN SPIKES 2
-
-  println("Min/max: "+ minP + ", " + maxP);
-  println(x);
+  strip.add(x0, z0);
 }
+
 
 
 void makeProfile5()
@@ -180,30 +173,26 @@ void makeProfile5()
   // looks a bit like a cat paw - sinusoidally-modulated ellipse
   profileName = "Param cubic ellipse 011";
 
-  double inc = Math.PI/48d;
-  double maxAngle = Math.PI*2d;
-  double offset = Math.PI/3d;
+  double inc = Math.PI/48d; // the resolution of the curve (smaller = more detail)
+  double envelopeMin = 0.75d; // values greater than 0.65 are more circular, less than that and outline sections cross one another
+  
+  float x0=0, z0=0; // initial points
 
-  float x0=0, z0=0;
-
-  double centerOffX = 1.15d;
-  double centerOffZ = 2.8d; // try 1.2 or 1.8
+  double centerOffX = 1.15d; // Shape central offset in horizonal direction
+  double centerOffZ = 2.8d;  // Shape central offset in vertical direction
 
   for (double angle=0; angle<=maxAngle; angle+=inc)
   {
-    double prog = Math.abs(angle/(maxAngle/2) - 1); //-1 to 1 --> 1 to 0 to 1
-    //double prog = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.2d); // little pointy on top
+    double envelope = Math.abs(angle/(maxAngle/2) - 1); // this will modify the elliptical profile shape
+    
+    envelope = envelopeMin + (1-envelopeMin)*Math.cos(8*Math.PI * envelope);  
+    envelope -= 1d; // 0 to -1 to 0
+    envelope = envelope*envelope*Math.abs(envelope); // smoothing, petal-like
 
-    prog = 0.75d + 0.25d*Math.cos(8*Math.PI * prog); 
+    double xx = (2d-envelope)*x + envelope*xBase;
 
-    prog -= 1d; // 0 to -1 to 0
-    prog = prog*prog*Math.abs(prog); // smoothing, petal-like
-    //prog = prog*prog; //cubic?
-
-    double xx = (2d-prog)*x + prog*xBase;
-
-    float newx = (float)(0.25d*xx*(Math.sin(angle+offset)+centerOffX))-xScale*3.6;
-    float newz = (float)(0.25d*xx*(Math.cos(angle+offset)+centerOffZ))-xScale*11;
+    float newx = (float)(0.25d*xx*(Math.sin(angle)+centerOffX))-xScale*3.6;
+    float newz = (float)(0.25d*xx*(Math.cos(angle)+centerOffZ))-xScale*11;
 
     if (angle == 0)
     {
