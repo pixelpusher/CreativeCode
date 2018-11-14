@@ -104,19 +104,168 @@ void makeProfile3()
 
   double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
   double offset = Math.PI/8d; // smaller values ( < PI/2) curl shape CCW, larger values in CW direction
+  // note: helix B uses offset of PI/3
+  double curviness = 1/5d; // how curvy/paisley-like the final shape is. 0 is flattened, 0.5 is circular
+  // and is max before outline splits
+
+  float x0=0, z0=0;
 
   // pointy on top v2 
   for (double angle=0; angle<maxAngle; angle+=inc)
   {
-    //double envelope = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.5d); // full sin
-    double envelope = Math.sin(Math.abs(angle/(maxAngle/2) - 1)*Math.PI*0.2d); // little pointy on top
-    //envelope = envelope*envelope; // smoothing
-    //envelope = envelope*envelope; //cubic?
+    double envelope = Math.abs(angle/(maxAngle/2) - 1); // -1 to 1
+    envelope = Math.sin(envelope*Math.PI*curviness); // little pointy on top
+    
+    double xx = envelope*x;  
+    double curvinessMax = Math.sin(Math.PI*curviness);
 
-    double xx = 2*envelope*x;  //yeah, float/double conversion blah blah
+    float newz = (float)(0.5d*xx/curvinessMax*(Math.cos(angle+offset)+1d));
+    float newx = (float)(0.5d*xx/curvinessMax*(Math.sin(angle+offset)+1d)); 
+    strip.add(newx, newz);
 
-    strip.add((float)(0.5d*xx*(Math.cos(angle+offset)+1d)), (float)(0.5d*xx*(Math.sin(angle+offset)+1d)));
+    // save first points to connect later
+    if (angle == 0)
+    {
+      x0 = newx;
+      z0 = newz;
+    }
+    strip.add(newx, newz);
   }
+  strip.add(x0, z0);
+}
+
+
+// for 005 & 006
+void makeProfile3b()
+{
+  // like a symmetrical leaf petal
+  profileName = "Param ellipse 005-6";
+
+  double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
+  double offset = Math.PI/8d; // smaller values ( < PI/2) curl shape CCW, larger values in CW direction
+  // note: helix B uses offset of PI/3
+  double curviness = 1/5d; // how curvy/paisley-like the final shape is. 0 is flattened, 0.5 is circular
+  // and is max before outline splits
+
+  float x0=0, z0=0;
+
+  // pointy on top v2 
+  for (double angle=0; angle<maxAngle; angle+=inc)
+  {
+    double envelope = Math.abs(angle/(maxAngle/2) - 1); // -1 to 1
+    //envelope = Math.sin(envelope*Math.PI*curviness); // little pointy on top
+    
+    //double xx = envelope*x;  
+    //double curvinessMax = Math.sin(Math.PI*curviness);
+
+    float ax = (float)Math.cos(angle+offset) + 1f;
+    ax *= 0.5;
+    ax *= ax;
+    float az = (float)Math.sin(angle+offset) + 1f;
+    az *= 0.5;
+    az *= az;
+
+    float newz = (float)(1d*x*ax*envelope);
+    float newx = (float)(1d*x*az*envelope); 
+    strip.add(newx, newz);
+
+    // save first points to connect later
+    if (angle == 0)
+    {
+      x0 = newx;
+      z0 = newz;
+    }
+    strip.add(newx, newz);
+  }
+  strip.add(x0, z0);
+}
+
+
+
+// for 005 & 006 // rewrite parametrically
+void makeProfile3c()
+{
+  // like a symmetrical leaf petal
+  profileName = "Param ellipse NEW";
+
+  double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
+
+  float x0=0, z0=0;
+
+  float flattenParam = 1/3f;
+
+  // pointy on top v2 
+  for (double angle=0; angle<maxAngle; angle+=inc)
+  {
+    float ax = (float)(x*Math.cos(angle))*0.5;
+    float sinTheta = (float)Math.sin(angle);
+    float sin2Theta = (float)Math.sin(2*angle);
+
+    float newz = ax+x/2;
+    float newx = ax;
+    
+    if (angle < PI)
+    {
+      newx = 0.5*x*(flattenParam*sinTheta + (flattenParam/2)*sin2Theta);
+    }
+    else 
+    {
+      newx = 1.33*x*(flattenParam*sinTheta - (flattenParam/2)*sin2Theta);
+    }
+    
+    float rotAngle = -PI/3;
+    
+    float nx = newz*cos(rotAngle)+newx*sin(rotAngle);
+    float nz = newx*cos(rotAngle)-newz*sin(rotAngle);
+        
+    // save first points to connect later
+    if (angle == 0)
+    {
+      x0 = nx;
+      z0 = nz;
+    }
+    strip.add(nx, nz);
+  }
+  strip.add(x0, z0);
+}
+
+
+
+// like 005 but rounder
+void makeProfile6()
+{
+  // like a symmetrical leaf petal
+  profileName = "Param ellipse 005 round";
+
+  double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
+  double offset = Math.PI/8d; // smaller values ( < PI/2) curl shape CCW, larger values in CW direction
+  // note: helix B uses offset of PI/3
+  double curviness = 0.5d; // how curvy/paisley-like the final shape is. 0 is circular, 0.5 is max before outline splits
+
+  float x0=0, z0=0;
+
+  // pointy on top v2 
+  for (double angle=0; angle<maxAngle; angle+=inc)
+  {
+    double envelope = Math.abs(angle/(maxAngle/2) - 1); // -1 to 1
+    envelope = Math.sin(envelope*Math.PI*curviness); // little pointy on top
+    
+    double xx = envelope*x;
+    double curvinessMax = Math.sin(Math.PI*curviness);
+
+    float newx = (float)(0.5d*xx/curvinessMax*(Math.cos(angle+offset)+1d));
+    float newz = (float)(0.5d*xx/curvinessMax*(Math.sin(angle+offset)+1d)); 
+    strip.add(newx, newz);
+
+    // save first points to connect later
+    if (angle == 0)
+    {
+      x0 = newx;
+      z0 = newz;
+    }
+    strip.add(newx, newz);
+  }
+  strip.add(x0, z0);
 }
 
 
@@ -144,7 +293,7 @@ void makeProfile4()
     envelope -= 1d; // 0 to -1 to 0
     envelope = envelope*envelope*Math.abs(envelope); // smoothing, petal-like
     envelope = 2d-envelope; // 0-1 range
-    
+
     envelopeMin -= 1d;
     envelopeMin = envelopeMin*envelopeMin*Math.abs(envelopeMin); // smoothing, petal-like
     envelopeMin = 2d-envelopeMin; // 0-1 range
@@ -175,7 +324,7 @@ void makeProfile5()
 
   double inc = Math.PI/48d; // the resolution of the curve (smaller = more detail)
   double envelopeMin = 0.75d; // values greater than 0.65 are more circular, less than that and outline sections cross one another
-  
+
   float x0=0, z0=0; // initial points
 
   double centerOffX = 1.15d; // Shape central offset in horizonal direction
@@ -184,7 +333,7 @@ void makeProfile5()
   for (double angle=0; angle<=maxAngle; angle+=inc)
   {
     double envelope = Math.abs(angle/(maxAngle/2) - 1); // this will modify the elliptical profile shape
-    
+
     envelope = envelopeMin + (1-envelopeMin)*Math.cos(8*Math.PI * envelope);  
     envelope -= 1d; // 0 to -1 to 0
     envelope = envelope*envelope*Math.abs(envelope); // smoothing, petal-like
@@ -206,6 +355,65 @@ void makeProfile5()
 }
 
 
+void makeProfile7()
+{
+  // for 005 & 006 -- modified version of 3
+
+  // like a symmetrical leaf petal
+  profileName = "Param ellipse 005-6";
+
+  double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
+  double offset = Math.PI/8d; // smaller values ( < PI/2) curl shape CCW, larger values in CW direction
+  // note: helix B uses offset of PI/3
+  double curviness = 1/5d; // how curvy/paisley-like the final shape is. 0 is flattened, 0.5 is circular
+  // and is max before outline splits
+
+  double curvinessMax = Math.sin(Math.PI*curviness);
+
+  float x0=0, z0=0;
+
+  // pointy on top v2 
+  for (double angle=0; angle<maxAngle; angle+=inc)
+  {
+    double envelope = Math.abs(angle/(maxAngle/2) - 1); // abs(-1 to 1)
+    
+    envelope = Math.sqrt(envelope);
+    
+    // flattened
+    //envelope *= envelope;
+    
+    // rounder
+    //double envelope = (Math.cos(angle)+ 1d)*0.5d; // abs(-1 to 1)
+    
+    //envelope = Math.sin(envelope*Math.PI*curviness); // little pointy on top
+    envelope = (envelope + 1d)/2d;
+    double xx = envelope*x;  
+
+    float newz = (float)(0.25d*xx/curvinessMax*(Math.cos(angle+offset)+1d));
+    float newx = (float)(0.25d*xx/curvinessMax*(Math.sin(angle+offset)+1d));
+        
+    float rotAngle = PI/8;
+    
+    //float nz = newz*cos(rotAngle)-newx*sin(rotAngle);
+    //float nx = newz*cos(rotAngle)+newx*sin(rotAngle);
+    
+    float nz = newz;
+    float nx = newx;
+    
+    strip.add(nx, nz);
+
+    // save first points to connect later
+    if (angle == 0)
+    {
+      x0 = nx;
+      z0 = nz;
+    }
+    //strip.add(newx, newz);
+  }
+  strip.add(x0, z0);
+}
+
+
 void draw() 
 {  
   strip = new LineStrip2D();
@@ -223,7 +431,7 @@ void draw()
     break;
 
   case 3:   
-    makeProfile3();
+    makeProfile3c();
     recording = true;
     break;
 
