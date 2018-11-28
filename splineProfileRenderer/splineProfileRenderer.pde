@@ -123,61 +123,6 @@ void setup()
     {
       // like a symmetrical leaf petal
 
-LineStrip2D strip = new LineStrip2D();
-
-      // Maximum angle for parametric sinusoidal shape envelope - needs to be 2PI so we get an elliptical, closed shape (only 
-      // for elliptical shapes). Minimum angle is 0, of course.
-      double maxAngle = Math.PI*2d; 
-
-      double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
-      double offset = Math.PI/8d; // smaller values ( < PI/2) curl shape CCW, larger values in CW direction
-      // note: helix B uses offset of PI/3
-      double curviness = 1/5d; // how curvy/paisley-like the final shape is. 0 is flattened, 0.5 is circular
-      // and is max before outline splits
-
-      float x0=0, z0=0;
-
-      // pointy on top v2 
-      for (double angle=0; angle<maxAngle; angle+=inc)
-      {
-        double envelope = Math.abs(angle/(maxAngle/2) - 1); // -1 to 1
-        envelope = Math.sin(envelope*Math.PI*curviness); // little pointy on top
-
-        double xx = envelope*x;  
-        double curvinessMax = Math.sin(Math.PI*curviness);
-
-        float newz = (float)(0.5d*xx/curvinessMax*(Math.cos(angle+offset)+1d));
-        float newx = (float)(0.5d*xx/curvinessMax*(Math.sin(angle+offset)+1d)); 
-        strip.add(newx, newz);
-
-        // save first points to connect later
-        if (angle == 0)
-        {
-          x0 = newx;
-          z0 = newz;
-        }
-        strip.add(newx, newz);
-      }
-      strip.add(x0, z0);
-      return strip;
-    }
-    public List<Vec2D> getControlPoints() { 
-      return null;
-    }
-  }
-  );
-
-
-
-  ///////////////// 2nd variant: for spirals 005 & 006 /////////////////////////////////
-  profilesIter.add( new Profile() {
-    public final String getName() { 
-      return "Param ellipse 005-6";
-    }
-
-    public final LineStrip2D calcPoints(double x, double z) 
-    {
-      // like a symmetrical leaf petal
       LineStrip2D strip = new LineStrip2D();
 
       // Maximum angle for parametric sinusoidal shape envelope - needs to be 2PI so we get an elliptical, closed shape (only 
@@ -192,25 +137,20 @@ LineStrip2D strip = new LineStrip2D();
 
       float x0=0, z0=0;
 
+      // curviness constant
+      double c = Math.PI*curviness;
+      double sinc = Math.sin(Math.PI*curviness);
+
       // pointy on top v2 
       for (double angle=0; angle<maxAngle; angle+=inc)
       {
-        double envelope = Math.abs(angle/(maxAngle/2) - 1); // -1 to 1
-        //envelope = Math.sin(envelope*Math.PI*curviness); // little pointy on top
+        double shape1 = Math.abs(angle/(maxAngle/2) - 1); // -1 to 1
 
-        //double xx = envelope*x;  
-        //double curvinessMax = Math.sin(Math.PI*curviness);
+        double shape2 = Math.sin(shape1*c) / sinc; // normalised curve btw 0-1
+        shape2 *= x; // scale horizontally
 
-        float ax = (float)Math.cos(angle+offset) + 1f;
-        ax *= 0.5;
-        ax *= ax;
-        float az = (float)Math.sin(angle+offset) + 1f;
-        az *= 0.5;
-        az *= az;
-
-        float newz = (float)(1d*x*ax*envelope);
-        float newx = (float)(1d*x*az*envelope); 
-        strip.add(newx, newz);
+        float newz = (float)(0.5d*shape2*(Math.cos(angle+offset)+1d)); //translate positive x,z
+        float newx = (float)(0.5d*shape2*(Math.sin(angle+offset)+1d)); //translate positive x,z
 
         // save first points to connect later
         if (angle == 0)
@@ -230,68 +170,191 @@ LineStrip2D strip = new LineStrip2D();
   );
 
 
-
-  ///////////////// 3rd variant: smooth parametric rewrite for spirals 005 & 006 /////////////////////////////////
-  profilesIter.add( new Profile() {
-    public final String getName() { 
-      return "Param ellipse 005-6 smooth";
-    }
-
-    public final LineStrip2D calcPoints(double x, double z) 
-    {
-      // like a symmetrical leaf petal
-LineStrip2D strip = new LineStrip2D();
-
-      // Maximum angle for parametric sinusoidal shape envelope - needs to be 2PI so we get an elliptical, closed shape (only 
-      // for elliptical shapes). Minimum angle is 0, of course.
-      double maxAngle = Math.PI*2d; 
-
-      double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
-
-      float x0=0, z0=0;
-
-      double flattenParam = 1/3d;
-
-      // pointy on top v2 
-      for (double angle=0; angle<maxAngle; angle+=inc)
-      {
-        double ax = x*Math.cos(angle)*0.5d;
-        double sinTheta = Math.sin(angle);
-        double sin2Theta = Math.sin(2d*angle);
-
-        double newz = ax+x/2;
-        double newx = ax;
-
-        if (angle < PI)
-        {
-          newx = 0.5d*x*(flattenParam*sinTheta + (flattenParam/2)*sin2Theta);
-        } else 
-        {
-          newx = 1.33d*x*(flattenParam*sinTheta - (flattenParam/2)*sin2Theta);
-        }
-
-        double rotAngle = -Math.PI/3d;
-
-        float nx = (float)(newz*Math.cos(rotAngle)+newx*Math.sin(rotAngle));
-        float nz = (float)(newx*Math.cos(rotAngle)-newz*Math.sin(rotAngle));
-
-        // save first points to connect later
-        if (angle == 0)
-        {
-          x0 = nx;
-          z0 = nz;
-        }
-        strip.add(nx, nz);
+  for (int i=0; i< 5; i++)
+  {
+    final int ii = i;
+    ///////////////// for spirals 005 & 006 sinesteeper /////////////////////////////////
+    profilesIter.add( new Profile() {
+      public final String getName() { 
+        return "Param ellipse 005-6 steeper/"+(ii/2d+2d);
       }
-      strip.add(x0, z0);
-      return strip;
-    }
-    public List<Vec2D> getControlPoints() { 
-      return null;
-    }
-  }
-  );
 
+      public final LineStrip2D calcPoints(double x, double z) 
+      {
+        // like a symmetrical leaf petal
+
+        LineStrip2D strip = new LineStrip2D();
+
+        // Maximum angle for parametric sinusoidal shape envelope - needs to be 2PI so we get an elliptical, closed shape (only 
+        // for elliptical shapes). Minimum angle is 0, of course.
+        double maxAngle = Math.PI*2d; 
+
+        double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
+        //double offset = 0d;
+        double offset = Math.PI/8d; // smaller values ( < PI/2) curl shape CCW, larger values in CW direction
+        // note: helix B uses offset of PI/3
+
+        double curviness = 1d/(2d+ii/2d); // how curvy/paisley-like the final shape is. 0 is flattened, 0.5 is circular
+        // and is max before outline splits
+
+        float x0=0, z0=0;
+
+        // curviness constant
+        double c = Math.PI*curviness;
+        double sinc = Math.sin(Math.PI*curviness);
+
+        // pointy on top v2 
+        for (double angle=0; angle<maxAngle; angle+=inc)
+        {
+          double shape1 = Math.abs(angle/Math.PI - 1); // -1 to 1
+
+          double shape2 = Math.sin(shape1*c) / sinc; // normalised curve btw 0-1
+          shape2 = x*shape2;
+          //shape2 = x*Math.sin(shape2*PI/2d); // scale horizontally
+
+          float newx = (float)(0.5d*shape2*(Math.cos(angle+offset)+1d)); //translate positive x,z
+          float newz = (float)(0.5d*shape2*(Math.sin(angle+offset)+1d)); //translate positive x,z
+
+          // save first points to connect later
+          if (angle == 0)
+          {
+            x0 = newx;
+            z0 = newz;
+          }
+          strip.add(newx, newz);
+        }
+        strip.add(x0, z0);
+        return strip;
+      }
+      public List<Vec2D> getControlPoints() { 
+        return null;
+      }
+    }
+    );
+  }
+
+  for (int i=0; i< 5; i++)
+  {
+    final int iii = i;
+    ///////////////// 2nd variant: for spirals 005 & 006 /////////////////////////////////
+    profilesIter.add( new Profile() {
+      public final String getName() { 
+        return "Param ellipse 005-6 v2/005_v2_" +(iii+1)*2;
+      }
+
+      public final LineStrip2D calcPoints(double x, double z) 
+      {
+        // like a symmetrical leaf petal
+        LineStrip2D strip = new LineStrip2D();
+
+        // Maximum angle for parametric sinusoidal shape envelope - needs to be 2PI so we get an elliptical, closed shape (only 
+        // for elliptical shapes). Minimum angle is 0, of course.
+        double maxAngle = Math.PI*2d; 
+
+        double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
+        double offset = Math.PI/((iii+1)*2d); // smaller values ( < PI/2) curl shape CCW, larger values in CW direction
+        // note: helix B uses offset of PI/3
+
+        float x0=0, z0=0;
+
+        // pointy on top v2 
+        for (double angle=0; angle<maxAngle; angle+=inc)
+        {
+          double envelope = Math.abs(angle/Math.PI - 1d); // -1 to 1
+
+          double ax = Math.cos(angle+offset) + 1d;
+          ax *= 0.5;
+          ax *= ax;
+          double az = Math.sin(angle+offset) + 1d;
+          az *= 0.5;
+          az *= az;
+
+          float newz = (float)(x*ax*envelope);
+          float newx = (float)(x*az*envelope); 
+          strip.add(newx, newz);
+
+          // save first points to connect later
+          if (angle == 0)
+          {
+            x0 = newx;
+            z0 = newz;
+          }
+          strip.add(newx, newz);
+        }
+        strip.add(x0, z0);
+        return strip;
+      }
+      public List<Vec2D> getControlPoints() { 
+        return null;
+      }
+    }
+    );
+  }
+
+  for (int i=0; i< 5; i++)
+  {
+    final double iiii = (i+1)+1;
+    ///////////////// 3rd variant: smooth parametric rewrite for spirals 005 & 006 /////////////////////////////////
+    profilesIter.add( new Profile() {
+      public final String getName() { 
+        return "Param ellipse 005-6 smooth/smooth_" + iiii;
+      }
+
+      public final LineStrip2D calcPoints(double x, double z) 
+      {
+        // like a symmetrical leaf petal
+        LineStrip2D strip = new LineStrip2D();
+
+        // Maximum angle for parametric sinusoidal shape envelope - needs to be 2PI so we get an elliptical, closed shape (only 
+        // for elliptical shapes). Minimum angle is 0, of course.
+        double maxAngle = Math.PI*2d; 
+
+        double inc = Math.PI/24d; // the resolution of the curve (smaller = more detail)
+
+        float x0=0, z0=0;
+
+        double flattenParam = 1/iiii;
+
+        // pointy on top v2 
+        for (double angle=0; angle<maxAngle; angle+=inc)
+        {
+          double ax = x*Math.cos(angle)*0.5d;
+          double sinTheta = Math.sin(angle);
+          double sin2Theta = Math.sin(2d*angle);
+
+          double newz = ax+x/2;
+          double newx = ax;
+
+          if (angle < PI)
+          {
+            newx = 0.5d*x*(flattenParam*sinTheta + (flattenParam/2)*sin2Theta);
+          } else 
+          {
+            newx = 1.33d*x*(flattenParam*sinTheta - (flattenParam/2)*sin2Theta);
+          }
+
+          double rotAngle = -Math.PI/3d;
+
+          float nx = (float)(newz*Math.cos(rotAngle)+newx*Math.sin(rotAngle));
+          float nz = (float)(newx*Math.cos(rotAngle)-newz*Math.sin(rotAngle));
+
+          // save first points to connect later
+          if (angle == 0)
+          {
+            x0 = nx;
+            z0 = nz;
+          }
+          strip.add(nx, nz);
+        }
+        strip.add(x0, z0);
+        return strip;
+      }
+      public List<Vec2D> getControlPoints() { 
+        return null;
+      }
+    }
+    );
+  }
 
   ///////////////// like 005 but rounder /////////////////////////////////
   profilesIter.add( new Profile() {
@@ -302,7 +365,7 @@ LineStrip2D strip = new LineStrip2D();
     public final LineStrip2D calcPoints(double x, double z) 
     {
       LineStrip2D strip = new LineStrip2D();
-      
+
       // Maximum angle for parametric sinusoidal shape envelope - needs to be 2PI so we get an elliptical, closed shape (only 
       // for elliptical shapes). Minimum angle is 0, of course.
       double maxAngle = Math.PI*2d; 
@@ -316,7 +379,7 @@ LineStrip2D strip = new LineStrip2D();
       // pointy on top v2 
       for (double angle=0; angle<maxAngle; angle+=inc)
       {
-        double envelope = Math.abs(angle/(maxAngle/2) - 1); // -1 to 1
+        double envelope = Math.abs(angle/Math.PI - 1d); // -1 to 1
         envelope = Math.sin(envelope*Math.PI*curviness); // little pointy on top
 
         double xx = envelope*x;
